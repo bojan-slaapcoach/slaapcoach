@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SlaapCoach — Leer je kind zelfstandig slapen</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --night: #07050f;
+      --deep: #0e0a1f;
+      --indigo: #1a1040;
+      --violet: #4f2f9f;
+      --lavender: #a78bfa;
+      --pale: #e8e0ff;
+      --gold: #f4c760;
+      --cream: #fdf6e3;
+      --muted: rgba(255,255,255,0.45);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--night);
+      color: white;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    /* ── STARS ── */
+    .stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: white;
+      animation: twinkle var(--d, 3s) ease-in-out infinite var(--delay, 0s);
+    }
+    @keyframes twinkle { 0%,100%{opacity:.08} 50%{opacity:.7} }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 24px 48px;
+      background: linear-gradient(to bottom, rgba(7,5,15,0.95), transparent);
+    }
+    .logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; letter-spacing: 1px; }
+    .logo span { color: var(--gold); }
+    .nav-cta {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.25);
+      color: white; padding: 10px 24px; border-radius: 40px;
+      font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer;
+      transition: all 0.3s; text-decoration: none; letter-spacing: 0.5px;
+    }
+    .nav-cta:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.5); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; z-index: 1;
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(79,47,159,0.35) 0%, transparent 70%);
+    }
+
+    .moon {
+      width: 120px; height: 120px; border-radius: 50%;
+      background: radial-gradient(circle at 38% 38%, #fff9e6, #ffd97d 60%, #f4a020);
+      box-shadow: 0 0 60px 20px rgba(244,199,96,0.2), 0 0 120px 40px rgba(244,199,96,0.08);
+      margin-bottom: 48px;
+      animation: moonFloat 7s ease-in-out infinite;
+      position: relative;
+    }
+    .moon::after {
+      content: '';
+      position: absolute; inset: 0; border-radius: 50%;
+      background: radial-gradient(circle at 65% 35%, rgba(255,255,255,0.15), transparent 60%);
+    }
+    @keyframes moonFloat { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-12px) rotate(2deg)} }
+
+    .badge {
+      display: inline-block;
+      border: 1px solid rgba(167,139,250,0.4);
+      color: var(--lavender);
+      font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+      padding: 6px 20px; border-radius: 40px;
+      margin-bottom: 28px;
+      background: rgba(167,139,250,0.07);
+      animation: fadeUp 1s ease-out 0.2s both;
+    }
+
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(44px, 8vw, 86px);
+      font-weight: 300;
+      line-height: 1.05;
+      letter-spacing: -1px;
+      max-width: 760px;
+      margin-bottom: 28px;
+      animation: fadeUp 1s ease-out 0.4s both;
+    }
+    h1 em {
+      font-style: italic;
+      background: linear-gradient(135deg, var(--gold), #ffb347);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 17px; color: var(--muted); max-width: 480px;
+      line-height: 1.7; margin-bottom: 48px;
+      animation: fadeUp 1s ease-out 0.6s both;
+    }
+
+    .cta-group {
+      display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+      animation: fadeUp 1s ease-out 0.8s both;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #7c3aed, #4f2f9f);
+      color: white; border: none; padding: 18px 40px; border-radius: 50px;
+      font-family: 'DM Sans', sans-serif; font-size: 15px; cursor: pointer;
+      box-shadow: 0 8px 40px rgba(124,58,237,0.45);
+      transition: all 0.3s; text-decoration: none; display: inline-block;
+      letter-spacing: 0.3px;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 50px rgba(124,58,237,0.6); }
+    .btn-ghost {
+      background: transparent; color: var(--muted);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 18px 40px; border-radius: 50px;
+      font-family: 'DM Sans', sans-serif; font-size: 15px; cursor: pointer;
+      transition: all 0.3s; text-decoration: none; display: inline-block;
+    }
+    .btn-ghost:hover { color: white; border-color: rgba(255,255,255,0.4); }
+
+    .scroll-hint {
+      position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      color: rgba(255,255,255,0.25); font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      animation: fadeUp 1s ease-out 1.4s both;
+    }
+    .scroll-arrow { width: 1px; height: 40px; background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.3)); }
+
+    /* ── SOCIAL PROOF ── */
+    .social-proof {
+      position: relative; z-index: 1;
+      display: flex; justify-content: center; align-items: center; gap: 12px;
+      padding: 20px 24px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .avatars { display: flex; }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 2px solid var(--night);
+      margin-left: -8px; font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #4f2f9f, #1a1040);
+    }
+    .avatars .avatar:first-child { margin-left: 0; }
+    .social-text { font-size: 13px; color: var(--muted); }
+    .social-text strong { color: white; font-weight: 500; }
+
+    /* ── PROBLEM SECTION ── */
+    .section { position: relative; z-index: 1; padding: 100px 24px; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+
+    .problem {
+      background: linear-gradient(135deg, rgba(14,10,31,0.8), rgba(26,16,64,0.6));
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 32px; padding: 80px 60px;
+    }
+    .problem-label {
+      font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--lavender); margin-bottom: 32px;
+    }
+    .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .problem h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(32px, 4vw, 52px); font-weight: 300;
+      line-height: 1.15; margin-bottom: 24px;
+    }
+    .problem h2 em { font-style: italic; color: var(--gold); }
+    .problem-body { color: var(--muted); line-height: 1.8; font-size: 16px; }
+
+    .pain-list { list-style: none; display: flex; flex-direction: column; gap: 16px; }
+    .pain-list li {
+      display: flex; align-items: flex-start; gap: 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 16px; padding: 20px 24px;
+      font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.5;
+    }
+    .pain-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── HOW IT WORKS ── */
+    .how { text-align: center; }
+    .section-label {
+      font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--lavender); margin-bottom: 20px; display: block;
+    }
+    .how h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(36px, 5vw, 60px); font-weight: 300;
+      margin-bottom: 16px; line-height: 1.1;
+    }
+    .how-sub { color: var(--muted); font-size: 16px; max-width: 440px; margin: 0 auto 72px; line-height: 1.7; }
+
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .step {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px; padding: 40px 32px;
+      position: relative; overflow: hidden;
+      transition: all 0.3s;
+    }
+    .step:hover {
+      background: rgba(79,47,159,0.15);
+      border-color: rgba(167,139,250,0.3);
+      transform: translateY(-4px);
+    }
+    .step::before {
+      content: attr(data-num);
+      position: absolute; top: 24px; right: 28px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 80px; font-weight: 300; line-height: 1;
+      color: rgba(255,255,255,0.04); pointer-events: none;
+    }
+    .step-icon { font-size: 36px; margin-bottom: 24px; display: block; }
+    .step h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px; font-weight: 400; margin-bottom: 12px;
+    }
+    .step p { color: var(--muted); font-size: 14px; line-height: 1.7; }
+
+    /* ── FEATURES ── */
+    .features { background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(79,47,159,0.15) 0%, transparent 70%); }
+    .features h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(36px, 5vw, 60px); font-weight: 300;
+      text-align: center; margin-bottom: 64px; line-height: 1.1;
+    }
+    .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .feature-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 24px; padding: 36px;
+      transition: all 0.3s;
+    }
+    .feature-card:hover { background: rgba(79,47,159,0.12); border-color: rgba(167,139,250,0.25); }
+    .feature-card.large { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+    .feature-icon { font-size: 28px; margin-bottom: 20px; display: block; }
+    .feature-card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px; font-weight: 400; margin-bottom: 12px;
+    }
+    .feature-card p { color: var(--muted); font-size: 14px; line-height: 1.7; }
+
+    /* ── TESTIMONIALS ── */
+    .testimonials { text-align: center; }
+    .testimonials h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(36px, 5vw, 56px); font-weight: 300; margin-bottom: 64px;
+    }
+    .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .testi {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 24px; padding: 36px;
+      text-align: left;
+    }
+    .stars-row { color: var(--gold); font-size: 14px; margin-bottom: 16px; letter-spacing: 2px; }
+    .testi-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px; font-weight: 300; font-style: italic;
+      line-height: 1.6; margin-bottom: 24px; color: rgba(255,255,255,0.85);
+    }
+    .testi-author { display: flex; align-items: center; gap: 12px; }
+    .testi-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, #4f2f9f, #7c3aed);
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+    }
+    .testi-name { font-size: 13px; font-weight: 500; }
+    .testi-role { font-size: 12px; color: var(--muted); }
+
+    /* ── PRICING ── */
+    .pricing { text-align: center; }
+    .pricing h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(36px, 5vw, 56px); font-weight: 300; margin-bottom: 16px;
+    }
+    .pricing-sub { color: var(--muted); font-size: 16px; margin-bottom: 56px; }
+
+    .price-card {
+      max-width: 420px; margin: 0 auto;
+      background: linear-gradient(135deg, rgba(79,47,159,0.3), rgba(26,16,64,0.5));
+      border: 1px solid rgba(167,139,250,0.3);
+      border-radius: 32px; padding: 56px 48px;
+      position: relative; overflow: hidden;
+    }
+    .price-card::before {
+      content: '';
+      position: absolute; top: -60px; right: -60px;
+      width: 200px; height: 200px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(167,139,250,0.15), transparent);
+      pointer-events: none;
+    }
+    .price-badge {
+      display: inline-block;
+      background: rgba(244,199,96,0.15);
+      border: 1px solid rgba(244,199,96,0.3);
+      color: var(--gold); font-size: 11px; letter-spacing: 2px;
+      text-transform: uppercase; padding: 6px 16px; border-radius: 40px;
+      margin-bottom: 32px;
+    }
+    .price-amount {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 72px; font-weight: 300; line-height: 1;
+      margin-bottom: 4px;
+    }
+    .price-amount sup { font-size: 28px; vertical-align: top; margin-top: 16px; }
+    .price-once { color: var(--muted); font-size: 14px; margin-bottom: 40px; }
+    .price-features { list-style: none; display: flex; flex-direction: column; gap: 14px; margin-bottom: 40px; text-align: left; }
+    .price-features li {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 14px; color: rgba(255,255,255,0.8);
+    }
+    .check { color: var(--lavender); font-size: 16px; flex-shrink: 0; }
+    .btn-primary-large {
+      width: 100%;
+      background: linear-gradient(135deg, #7c3aed, #4f2f9f);
+      color: white; border: none; padding: 20px; border-radius: 16px;
+      font-family: 'DM Sans', sans-serif; font-size: 16px; cursor: pointer;
+      box-shadow: 0 8px 40px rgba(124,58,237,0.4);
+      transition: all 0.3s; letter-spacing: 0.3px;
+    }
+    .btn-primary-large:hover { transform: translateY(-2px); box-shadow: 0 12px 50px rgba(124,58,237,0.6); }
+    .price-note { font-size: 12px; color: var(--muted); margin-top: 20px; }
+
+    /* ── CTA BANNER ── */
+    .cta-banner {
+      position: relative; z-index: 1;
+      margin: 0 24px 100px;
+      background: linear-gradient(135deg, rgba(79,47,159,0.4), rgba(26,16,64,0.7));
+      border: 1px solid rgba(167,139,250,0.2);
+      border-radius: 32px; padding: 80px 48px;
+      text-align: center; overflow: hidden;
+    }
+    .cta-banner::before {
+      content: '🌙';
+      position: absolute; font-size: 200px;
+      opacity: 0.04; top: -20px; right: -20px; pointer-events: none;
+    }
+    .cta-banner h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(36px, 5vw, 56px); font-weight: 300;
+      margin-bottom: 16px; line-height: 1.1;
+    }
+    .cta-banner p { color: var(--muted); font-size: 16px; margin-bottom: 40px; }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding: 40px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      color: var(--muted); font-size: 13px;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reveal {
+      opacity: 0; transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 20px 24px; }
+      .problem { padding: 48px 28px; }
+      .problem-grid { grid-template-columns: 1fr; gap: 40px; }
+      .steps { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .feature-card.large { grid-column: span 1; grid-template-columns: 1fr; }
+      .testi-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 16px; text-align: center; }
+      .social-proof { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Stars -->
+<div class="stars" id="stars"></div>
+
+<!-- Nav -->
+<nav>
+  <div class="logo">Slaap<span>Coach</span> <span style="opacity:0.4; font-size:14px;">✦</span> AI</div>
+  <a href="#prijzen" class="nav-cta">Begin vandaag →</a>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="moon"></div>
+  <div class="badge">AI-gedreven slaaphulp voor ouders</div>
+  <h1>Eindelijk een <em>rustige nacht</em> voor het hele gezin</h1>
+  <p class="hero-sub">SlaapCoach begeleidt jou stap voor stap zodat je kind van 3–8 jaar zelfstandig leert slapen — zonder eindeloze strijd, zonder hulp van dure coaches.</p>
+  <div class="cta-group">
+    <a href="#prijzen" class="btn-primary">Probeer 7 dagen gratis</a>
+    <a href="#hoe-het-werkt" class="btn-ghost">Hoe werkt het?</a>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-arrow"></div>
+    scroll
+  </div>
+</section>
+
+<!-- Social proof bar -->
+<div class="social-proof">
+  <div class="avatars">
+    <div class="avatar">👩</div>
+    <div class="avatar">👨</div>
+    <div class="avatar">👩</div>
+    <div class="avatar">👨</div>
+    <div class="avatar">👩</div>
+  </div>
+  <p class="social-text"><strong>Meer dan 1.200 ouders</strong> slapen al beter dankzij SlaapCoach</p>
+  <div style="color: #f4c760; font-size: 13px; letter-spacing: 2px;">★★★★★</div>
+</div>
+
+<!-- Problem section -->
+<section class="section">
+  <div class="section-inner">
+    <div class="problem reveal">
+      <p class="problem-label">✦ Herken jij dit?</p>
+      <div class="problem-grid">
+        <div>
+          <h2>Slaapgebrek maakt <em>alles</em> zwaarder</h2>
+          <p class="problem-body">Elke avond dezelfde strijd. Steeds opnieuw naar de slaapkamer. Moe wakker worden. Je weet dat het anders moet — maar hoe? Professionele slaapcoaches kosten honderden euro's. En op internet vind je tegenstrijdige adviezen.</p>
+        </div>
+        <ul class="pain-list">
+          <li><span class="pain-icon">😮‍💨</span> Mijn kind wil niet alleen in slaap vallen en roept me keer op keer</li>
+          <li><span class="pain-icon">🌙</span> Elke nacht stapt mijn kind ons bed in</li>
+          <li><span class="pain-icon">😤</span> Bedtijd is elke avond een gevecht</li>
+          <li><span class="pain-icon">⏰</span> Om 5 uur 's ochtends staat mijn kind al naast mijn bed</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="section how" id="hoe-het-werkt">
+  <div class="section-inner">
+    <span class="section-label">✦ Hoe het werkt</span>
+    <h2>Drie stappen naar rustige nachten</h2>
+    <p class="how-sub">Geen ingewikkelde handleiding. Gewoon een gesprek met je persoonlijke AI-slaapcoach.</p>
+    <div class="steps">
+      <div class="step reveal" data-num="1">
+        <span class="step-icon">💬</span>
+        <h3>Vertel je situatie</h3>
+        <p>Beschrijf wat er speelt: leeftijd van je kind, het slaapprobleem, wat je al geprobeerd hebt. SlaapCoach luistert en stelt gerichte vragen.</p>
+      </div>
+      <div class="step reveal" data-num="2" style="transition-delay:0.15s">
+        <span class="step-icon">🌙</span>
+        <h3>Ontvang jouw slaapplan</h3>
+        <p>Je krijgt een persoonlijk, stap-voor-stap slaapplan gebaseerd op bewezen methodes zoals de fading-techniek en positieve bekrachtiging.</p>
+      </div>
+      <div class="step reveal" data-num="3" style="transition-delay:0.3s">
+        <span class="step-icon">⭐</span>
+        <h3>Pas toe en geniet</h3>
+        <p>Volg het plan en stel vragen wanneer je vastloopt. SlaapCoach is 24/7 beschikbaar — ook om 3 uur 's nachts als je hulp nodig hebt.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="section features">
+  <div class="section-inner">
+    <span class="section-label" style="display:block;text-align:center;">✦ Wat je krijgt</span>
+    <h2>Alles wat je nodig hebt,<br/>niets wat je niet nodig hebt</h2>
+    <div class="features-grid">
+      <div class="feature-card large reveal">
+        <div>
+          <span class="feature-icon">🤖</span>
+          <h3>Persoonlijke AI-slaapcoach</h3>
+          <p>Geen generieke tips van internet. SlaapCoach stelt vragen over jóuw kind en geeft advies op maat. Beschikbaar dag en nacht, zo vaak je wil.</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:28px;">
+          <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px;font-style:italic;">Voorbeeld gesprek</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="background:rgba(79,47,159,0.3);border-radius:12px 12px 12px 4px;padding:12px 16px;font-size:13px;max-width:85%;">Hoe oud is je kind en hoe lang loopt dit slaapprobleem al?</div>
+            <div style="background:rgba(255,255,255,0.07);border-radius:12px 12px 4px 12px;padding:12px 16px;font-size:13px;max-width:85%;margin-left:auto;text-align:right;">5 jaar, al een half jaar doet hij dit.</div>
+            <div style="background:rgba(79,47,159,0.3);border-radius:12px 12px 12px 4px;padding:12px 16px;font-size:13px;max-width:85%;">Ik begrijp het. Hier is een concreet 2-wekenplan speciaal voor jou... 🌙</div>
+          </div>
+        </div>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-icon">🎯</span>
+        <h3>Bewezen methodes</h3>
+        <p>Gebaseerd op slaapwetenschappen: fading, positieve bekrachtiging, slaaprituelen. Veilig en kindvriendelijk.</p>
+      </div>
+      <div class="feature-card reveal" style="transition-delay:0.1s">
+        <span class="feature-icon">🌍</span>
+        <h3>100% in het Nederlands</h3>
+        <p>Alles in jouw taal. Geen vertaling nodig. De coach begrijpt Nederlandse slaapgewoontes en gezinsситуaties.</p>
+      </div>
+      <div class="feature-card reveal" style="transition-delay:0.2s">
+        <span class="feature-icon">📱</span>
+        <h3>Altijd bij de hand</h3>
+        <p>Werkt op je telefoon, tablet en computer. Open de app wanneer je hem nodig hebt — ook midden in de nacht.</p>
+      </div>
+      <div class="feature-card reveal" style="transition-delay:0.3s">
+        <span class="feature-icon">💰</span>
+        <h3>Fractie van de kosten</h3>
+        <p>Een professionele slaapcoach kost €300–€500. SlaapCoach geeft je hetzelfde resultaat voor een paar euro.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="section testimonials">
+  <div class="section-inner">
+    <span class="section-label">✦ Wat ouders zeggen</span>
+    <h2>Echte gezinnen, echte resultaten</h2>
+    <div class="testi-grid">
+      <div class="testi reveal">
+        <div class="stars-row">★★★★★</div>
+        <p class="testi-text">"Na 3 weken had onze dochter van 4 voor het eerst zelf ingeslapen. Het slaapplan was heel concreet en makkelijk te volgen."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">👩</div>
+          <div>
+            <div class="testi-name">Lisa van der Berg</div>
+            <div class="testi-role">Moeder van Emma (4)</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi reveal" style="transition-delay:0.15s">
+        <div class="stars-row">★★★★★</div>
+        <p class="testi-text">"Ik was sceptisch over AI-advies, maar dit werkt echt. De coach stelde precies de juiste vragen en gaf advies dat bij ons gezin paste."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">👨</div>
+          <div>
+            <div class="testi-name">Mark Janssen</div>
+            <div class="testi-role">Vader van Tim (6) en Sara (8)</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi reveal" style="transition-delay:0.3s">
+        <div class="stars-row">★★★★★</div>
+        <p class="testi-text">"Eindelijk slapen wij ook weer door. We hadden al van alles geprobeerd — dit was de eerste aanpak die écht werkte voor ons."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">👩</div>
+          <div>
+            <div class="testi-name">Sophie de Vries</div>
+            <div class="testi-role">Moeder van Lotte (5)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section class="section pricing" id="prijzen">
+  <div class="section-inner">
+    <span class="section-label">✦ Investering</span>
+    <h2>Eén prijs. Voor altijd toegang.</h2>
+    <p class="pricing-sub">Geen abonnement. Geen verrassingen. Gewoon rust in huis.</p>
+    <div class="price-card reveal">
+      <div class="price-badge">Volledige toegang</div>
+      <div class="price-amount"><sup>€</sup>25</div>
+      <p class="price-once">eenmalig — levenslange toegang</p>
+      <ul class="price-features">
+        <li><span class="check">✦</span> Onbeperkt chatten met je slaapcoach</li>
+        <li><span class="check">✦</span> Persoonlijk slaapplan op maat</li>
+        <li><span class="check">✦</span> Bewezen methodes voor 3–8 jaar</li>
+        <li><span class="check">✦</span> 24/7 beschikbaar, ook 's nachts</li>
+        <li><span class="check">✦</span> Updates en nieuwe functies gratis</li>
+        <li><span class="check">✦</span> 30 dagen niet-goed-geld-terug garantie</li>
+      </ul>
+      <button class="btn-primary-large">Begin met rustige nachten →</button>
+      <p class="price-note">100% veilig betalen · Geen abonnement · Annuleer nooit nodig</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Banner -->
+<div class="cta-banner reveal">
+  <h2>Jouw kind kan dit leren.<br/>Wij helpen jullie.</h2>
+  <p>Sluit je aan bij meer dan 1.200 ouders die al rustig slapen.</p>
+  <a href="#prijzen" class="btn-primary">Start vandaag voor €25 →</a>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="logo">Slaap<span>Coach</span> AI</div>
+  <div>© 2025 SlaapCoach · <a href="#" style="color:inherit;opacity:0.6;">Privacy</a> · <a href="#" style="color:inherit;opacity:0.6;">Voorwaarden</a></div>
+  <div style="color:var(--muted)">Gemaakt met ♥ voor uitgeputte ouders</div>
+</footer>
+
+<script>
+  // Generate stars
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.classList.add('star');
+    const size = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `
+      width:${size}px;height:${size}px;
+      left:${Math.random()*100}%;top:${Math.random()*100}%;
+      --d:${(Math.random()*3+2).toFixed(1)}s;
+      --delay:-${(Math.random()*5).toFixed(1)}s;
+      opacity:${Math.random()*0.5+0.05};
+    `;
+    starsEl.appendChild(s);
+  }
+
+  // Reveal on scroll
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
