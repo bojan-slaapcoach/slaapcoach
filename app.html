@@ -15,7 +15,6 @@
       overflow: hidden;
     }
 
-    /* Stars */
     #stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
     .star { position: absolute; border-radius: 50%; background: white; }
 
@@ -25,23 +24,17 @@
     @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
     @keyframes fadeIn { from{opacity:0} to{opacity:1} }
 
-    /* Layout */
-    #home, #chat {
-      position: relative; z-index: 2;
-      max-width: 480px; margin: 0 auto;
-    }
+    #home, #chat { position: relative; z-index: 2; max-width: 480px; margin: 0 auto; }
     #home { padding: 52px 22px 40px; animation: fadeIn 0.6s ease-out; }
     #chat { height: 100vh; display: flex; flex-direction: column; }
     .hidden { display: none !important; }
 
-    /* Home header */
     .moon-wrap { display: flex; justify-content: center; margin-bottom: 20px; }
     .moon {
       width: 70px; height: 70px; border-radius: 50%;
       background: radial-gradient(circle at 36% 36%, #fff9e6, #ffd97d 60%, #f4a020);
       box-shadow: 0 0 40px 12px rgba(244,199,96,0.22), 0 0 80px 24px rgba(244,199,96,0.08);
-      animation: moonFloat 7s ease-in-out infinite;
-      position: relative;
+      animation: moonFloat 7s ease-in-out infinite; position: relative;
     }
     .moon::after {
       content: ''; position: absolute; inset: 0; border-radius: 50%;
@@ -54,147 +47,73 @@
       background: linear-gradient(135deg, #e0c3fc, #c4b5fd, #818cf8);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .subtitle {
-      font-size: 11px; letter-spacing: 4px; color: #a78bfa;
-      text-transform: uppercase; text-align: center; margin-bottom: 18px;
-    }
-    .tagline {
-      font-size: 15px; color: rgba(255,255,255,0.6); line-height: 1.65;
-      text-align: center; max-width: 320px; margin: 0 auto 36px;
-    }
+    .subtitle { font-size: 11px; letter-spacing: 4px; color: #a78bfa; text-transform: uppercase; text-align: center; margin-bottom: 18px; }
+    .tagline { font-size: 15px; color: rgba(255,255,255,0.6); line-height: 1.65; text-align: center; max-width: 320px; margin: 0 auto 36px; }
 
-    /* Starters grid */
-    .starters-label {
-      font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
-      color: #7c3aed; margin-bottom: 13px; text-align: center;
-    }
-    .starters {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin-bottom: 26px;
-    }
+    .starters-label { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #7c3aed; margin-bottom: 13px; text-align: center; }
+    .starters { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin-bottom: 26px; }
     .starter-btn {
-      background: rgba(255,255,255,0.045);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 16px; padding: 17px 14px;
-      color: white; cursor: pointer; text-align: left;
-      font-family: 'Georgia', serif; transition: all 0.2s;
+      background: rgba(255,255,255,0.045); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px; padding: 17px 14px; color: white; cursor: pointer;
+      text-align: left; font-family: 'Georgia', serif; transition: all 0.2s;
     }
-    .starter-btn:hover {
-      background: rgba(124,58,237,0.18);
-      border-color: rgba(124,58,237,0.45);
-    }
+    .starter-btn:hover { background: rgba(124,58,237,0.18); border-color: rgba(124,58,237,0.45); }
     .starter-emoji { font-size: 22px; margin-bottom: 8px; }
     .starter-label { font-size: 12.5px; line-height: 1.4; color: rgba(255,255,255,0.78); }
 
-    /* Free input */
     .or-text { font-size: 11px; color: rgba(255,255,255,0.28); margin-bottom: 11px; text-align: center; }
     .input-row { display: flex; gap: 9px; }
     .text-input {
-      flex: 1; background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.13);
-      border-radius: 12px; padding: 13px 15px;
-      color: white; font-size: 13.5px; font-family: 'Georgia', serif;
+      flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.13);
+      border-radius: 12px; padding: 13px 15px; color: white; font-size: 13.5px; font-family: 'Georgia', serif;
     }
     .text-input:focus { outline: none; border-color: rgba(124,58,237,0.5); }
     .send-btn {
-      background: linear-gradient(135deg, #7c3aed, #4f46e5);
-      border: none; border-radius: 12px; padding: 13px 18px;
-      color: white; cursor: pointer; font-size: 17px;
-      box-shadow: 0 4px 18px rgba(124,58,237,0.4);
-      transition: all 0.2s;
+      background: linear-gradient(135deg, #7c3aed, #4f46e5); border: none; border-radius: 12px;
+      padding: 13px 18px; color: white; cursor: pointer; font-size: 17px;
+      box-shadow: 0 4px 18px rgba(124,58,237,0.4); transition: all 0.2s;
     }
     .send-btn:hover { transform: translateY(-1px); }
     .send-btn:disabled { background: rgba(255,255,255,0.08); box-shadow: none; cursor: default; transform: none; }
 
-    /* Chat topbar */
     .topbar {
-      display: flex; align-items: center; gap: 11px;
-      padding: 18px 20px 14px;
+      display: flex; align-items: center; gap: 11px; padding: 18px 20px 14px;
       border-bottom: 1px solid rgba(255,255,255,0.07);
-      background: rgba(7,5,15,0.7); backdrop-filter: blur(12px);
-      flex-shrink: 0;
+      background: rgba(7,5,15,0.7); backdrop-filter: blur(12px); flex-shrink: 0;
     }
-    .back-btn {
-      background: none; border: none; color: rgba(255,255,255,0.45);
-      cursor: pointer; font-size: 19px; padding: 0 6px 0 0;
-      font-family: 'Georgia', serif; line-height: 1;
-    }
-    .coach-avatar {
-      width: 38px; height: 38px; border-radius: 50%;
-      background: linear-gradient(135deg, #7c3aed, #4f46e5);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; box-shadow: 0 0 14px rgba(124,58,237,0.45);
-    }
+    .back-btn { background: none; border: none; color: rgba(255,255,255,0.45); cursor: pointer; font-size: 19px; padding: 0 6px 0 0; font-family: 'Georgia', serif; line-height: 1; }
+    .coach-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #4f46e5); display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 0 14px rgba(124,58,237,0.45); }
     .coach-name { font-size: 14.5px; font-weight: bold; }
     .coach-status { font-size: 10.5px; color: #a78bfa; letter-spacing: 1px; }
 
-    /* Messages */
-    #messages {
-      flex: 1; overflow-y: auto; padding: 22px 18px 14px;
-    }
+    #messages { flex: 1; overflow-y: auto; padding: 22px 18px 14px; }
     #messages::-webkit-scrollbar { width: 3px; }
     #messages::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.35); border-radius: 2px; }
 
-    .msg-row {
-      display: flex; margin-bottom: 14px; gap: 10px; align-items: flex-end;
-      animation: fadeUp 0.3s ease-out;
-    }
+    .msg-row { display: flex; margin-bottom: 14px; gap: 10px; align-items: flex-end; animation: fadeUp 0.3s ease-out; }
     .msg-row.user { justify-content: flex-end; }
-    .msg-avatar {
-      width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
-      background: linear-gradient(135deg, #7c3aed, #4f46e5);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px; box-shadow: 0 0 14px rgba(124,58,237,0.45);
-    }
-    .bubble {
-      max-width: 74%; padding: 13px 17px;
-      font-size: 14px; line-height: 1.65; white-space: pre-wrap;
-    }
-    .bubble.assistant {
-      border-radius: 18px 18px 18px 4px;
-      background: rgba(255,255,255,0.07);
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-    .bubble.user {
-      border-radius: 18px 18px 4px 18px;
-      background: linear-gradient(135deg, #7c3aed, #5b21b6);
-      box-shadow: 0 4px 20px rgba(124,58,237,0.3);
-    }
+    .msg-avatar { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg, #7c3aed, #4f46e5); display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 0 14px rgba(124,58,237,0.45); }
+    .bubble { max-width: 74%; padding: 13px 17px; font-size: 14px; line-height: 1.65; white-space: pre-wrap; }
+    .bubble.assistant { border-radius: 18px 18px 18px 4px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); }
+    .bubble.user { border-radius: 18px 18px 4px 18px; background: linear-gradient(135deg, #7c3aed, #5b21b6); box-shadow: 0 4px 20px rgba(124,58,237,0.3); }
 
-    /* Typing dots */
     .typing-row { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; }
-    .typing-dots {
-      display: flex; gap: 5px; padding: 14px 18px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 18px 18px 18px 4px;
-    }
-    .dot {
-      width: 7px; height: 7px; border-radius: 50%; background: #a78bfa;
-      animation: bounce 1.2s ease-in-out infinite;
-    }
+    .typing-dots { display: flex; gap: 5px; padding: 14px 18px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px 18px 18px 4px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #a78bfa; animation: bounce 1.2s ease-in-out infinite; }
     .dot:nth-child(2) { animation-delay: 0.18s; }
     .dot:nth-child(3) { animation-delay: 0.36s; }
 
-    /* Error */
     .error-msg { color: #f87171; font-size: 13px; text-align: center; padding: 6px 0; }
 
-    /* Input bar */
-    .input-bar {
-      padding: 12px 18px 28px; flex-shrink: 0;
-      border-top: 1px solid rgba(255,255,255,0.07);
-      background: rgba(7,5,15,0.7); backdrop-filter: blur(12px);
-    }
-    .input-bar .input-row { align-items: flex-end; }
-    textarea.text-input {
-      resize: none; line-height: 1.5; max-height: 110px; overflow-y: auto;
-    }
+    .input-bar { padding: 12px 18px 28px; flex-shrink: 0; border-top: 1px solid rgba(255,255,255,0.07); background: rgba(7,5,15,0.7); backdrop-filter: blur(12px); }
+    textarea.text-input { resize: none; line-height: 1.5; max-height: 110px; overflow-y: auto; }
   </style>
 </head>
 <body>
 
 <div id="stars"></div>
 
-<!-- HOME SCREEN -->
+<!-- HOME -->
 <div id="home">
   <div class="moon-wrap"><div class="moon"></div></div>
   <h1>SlaapCoach</h1>
@@ -204,32 +123,28 @@
   <p class="starters-label">Wat is jouw situatie?</p>
   <div class="starters">
     <button class="starter-btn" onclick="startChat('Mijn kind wil niet alleen in slaap vallen en roept me steeds terug.')">
-      <div class="starter-emoji">😴</div>
-      <div class="starter-label">Niet alleen inslapen</div>
+      <div class="starter-emoji">😴</div><div class="starter-label">Niet alleen inslapen</div>
     </button>
     <button class="starter-btn" onclick="startChat('Mijn kind komt elke nacht naar ons bed.')">
-      <div class="starter-emoji">🌙</div>
-      <div class="starter-label">Naar ouders komen</div>
+      <div class="starter-emoji">🌙</div><div class="starter-label">Naar ouders komen</div>
     </button>
     <button class="starter-btn" onclick="startChat('Elke avond is er een gevecht bij het naar bed gaan.')">
-      <div class="starter-emoji">😤</div>
-      <div class="starter-label">Bedtijd protest</div>
+      <div class="starter-emoji">😤</div><div class="starter-label">Bedtijd protest</div>
     </button>
     <button class="starter-btn" onclick="startChat('Mijn kind wordt veel te vroeg wakker, soms al om 5 uur.')">
-      <div class="starter-emoji">🌅</div>
-      <div class="starter-label">Vroeg wakker</div>
+      <div class="starter-emoji">🌅</div><div class="starter-label">Vroeg wakker</div>
     </button>
   </div>
 
   <p class="or-text">of beschrijf je eigen situatie</p>
   <div class="input-row">
     <input id="home-input" type="text" class="text-input" placeholder="Bijv: mijn kind van 6 slaapt niet..."
-      onkeydown="if(event.key==='Enter' && this.value.trim()) startChat(this.value.trim())"/>
-    <button class="send-btn" onclick="var v=document.getElementById('home-input').value.trim(); if(v) startChat(v)">→</button>
+      onkeydown="if(event.key==='Enter'&&this.value.trim())startChat(this.value.trim())"/>
+    <button class="send-btn" onclick="var v=document.getElementById('home-input').value.trim();if(v)startChat(v)">→</button>
   </div>
 </div>
 
-<!-- CHAT SCREEN -->
+<!-- CHAT -->
 <div id="chat" class="hidden">
   <div class="topbar">
     <button class="back-btn" onclick="goHome()">←</button>
@@ -239,15 +154,13 @@
       <div class="coach-status">● Online · AI slaapexpert</div>
     </div>
   </div>
-
   <div id="messages"></div>
-
   <div class="input-bar">
     <div class="input-row">
       <textarea id="chat-input" class="text-input" rows="1"
         placeholder="Stel je vraag... (Enter om te sturen)"
-        onkeydown="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); sendMessage(); }"></textarea>
-      <button id="chat-send" class="send-btn" onclick="sendMessage()">↑</button>
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
+      <button class="send-btn" onclick="sendMessage()">↑</button>
     </div>
   </div>
 </div>
@@ -264,19 +177,12 @@ Jouw aanpak:
 - Houd antwoorden beknopt en overzichtelijk (gebruik bullet points of stappen waar nuttig)
 - Moedig ouders aan en erken dat dit uitdagend is
 
-Veelvoorkomende problemen die je helpt oplossen:
-- Kind wil niet alleen inslapen
-- Kind komt 's nachts naar de ouders toe
-- Kind heeft moeite met bedtijd / protest bij bedtijd
-- Vroeg wakker worden
-- Nachtmerries / angst in het donker
-
 Geef altijd praktische tips die ouders direct kunnen toepassen. Houd je eerste reactie kort en stel maximaal 2 vragen.`;
 
   let messages = [];
   let loading = false;
 
-  // Generate stars
+  // Sterren genereren
   const starsEl = document.getElementById('stars');
   for (let i = 0; i < 60; i++) {
     const s = document.createElement('div');
@@ -320,68 +226,47 @@ Geef altijd praktische tips die ouders direct kunnen toepassen. Houd je eerste r
   function renderMessages() {
     const container = document.getElementById('messages');
     container.innerHTML = '';
-
     messages.forEach(msg => {
       const row = document.createElement('div');
       row.className = 'msg-row ' + msg.role;
-
       if (msg.role === 'assistant') {
-        const avatar = document.createElement('div');
-        avatar.className = 'msg-avatar';
-        avatar.textContent = '🌙';
-        row.appendChild(avatar);
+        const av = document.createElement('div');
+        av.className = 'msg-avatar';
+        av.textContent = '🌙';
+        row.appendChild(av);
       }
-
       const bubble = document.createElement('div');
       bubble.className = 'bubble ' + msg.role;
       bubble.textContent = msg.content;
       row.appendChild(bubble);
-
       container.appendChild(row);
     });
 
     if (loading) {
-      const typingRow = document.createElement('div');
-      typingRow.className = 'typing-row';
-      typingRow.innerHTML = `
-        <div class="msg-avatar">🌙</div>
-        <div class="typing-dots">
-          <div class="dot"></div>
-          <div class="dot"></div>
-          <div class="dot"></div>
-        </div>`;
-      container.appendChild(typingRow);
+      const tr = document.createElement('div');
+      tr.className = 'typing-row';
+      tr.innerHTML = `<div class="msg-avatar">🌙</div><div class="typing-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+      container.appendChild(tr);
     }
-
     container.scrollTop = container.scrollHeight;
   }
 
   async function callAPI() {
     loading = true;
     renderMessages();
-
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      // Roept onze eigen Vercel backend aan — API key staat veilig op de server
+      const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          system: SYSTEM_PROMPT,
-          messages: messages
-        })
+        body: JSON.stringify({ messages, system: SYSTEM_PROMPT })
       });
       const data = await res.json();
       const text = data.content?.[0]?.text || 'Er ging iets mis. Probeer het opnieuw.';
       messages.push({ role: 'assistant', content: text });
     } catch (e) {
-      const container = document.getElementById('messages');
-      const err = document.createElement('div');
-      err.className = 'error-msg';
-      err.textContent = 'Verbinding mislukt. Probeer het opnieuw.';
-      container.appendChild(err);
+      messages.push({ role: 'assistant', content: '❌ Verbinding mislukt. Controleer je internetverbinding en probeer opnieuw.' });
     }
-
     loading = false;
     renderMessages();
   }
