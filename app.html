@@ -3,273 +3,938 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SlaapCoach — AI Slaapcoach</title>
+  <title>SlaapCoach AI — Persoonlijk Slaapprogramma</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Cormorant+Garamond:wght@300;400&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --bg: #07050f;
+      --surface: rgba(255,255,255,0.05);
+      --border: rgba(255,255,255,0.1);
+      --violet: #7c3aed;
+      --lavender: #a78bfa;
+      --gold: #f4c760;
+      --muted: rgba(255,255,255,0.5);
+      --sans: 'DM Sans', sans-serif;
+      --serif: 'Cormorant Garamond', serif;
+    }
+
+    html, body { height: 100%; }
+
     body {
-      background: linear-gradient(160deg, #07050f 0%, #130d2a 45%, #0d1535 100%);
+      background: linear-gradient(160deg, #07050f 0%, #130d2a 50%, #0d1535 100%);
       color: white;
-      font-family: 'Georgia', serif;
+      font-family: var(--sans);
       min-height: 100vh;
-      overflow: hidden;
+      overflow-x: hidden;
     }
 
     #stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
     .star { position: absolute; border-radius: 50%; background: white; }
 
-    @keyframes twinkle { 0%,100%{opacity:.08} 50%{opacity:.75} }
-    @keyframes moonFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-    @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-    @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
-    @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    @keyframes twinkle   { 0%,100%{opacity:.06} 50%{opacity:.6} }
+    @keyframes moonFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+    @keyframes fadeUp    { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes fadeIn    { from{opacity:0} to{opacity:1} }
+    @keyframes bounce    { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+    @keyframes pulse     { 0%,100%{opacity:.6} 50%{opacity:1} }
 
-    #home, #chat { position: relative; z-index: 2; max-width: 480px; margin: 0 auto; }
-    #home { padding: 52px 22px 40px; animation: fadeIn 0.6s ease-out; }
-    #chat { height: 100vh; display: flex; flex-direction: column; }
-    .hidden { display: none !important; }
+    /* ── SCREENS ── */
+    .screen { position: relative; z-index: 2; display: none; max-width: 520px; margin: 0 auto; padding: 0 20px; }
+    .screen.active { display: block; animation: fadeIn 0.4s ease-out; }
 
-    .moon-wrap { display: flex; justify-content: center; margin-bottom: 20px; }
-    .moon {
-      width: 70px; height: 70px; border-radius: 50%;
+    /* ── LANG TOGGLE ── */
+    .lang-toggle {
+      position: fixed; top: 18px; right: 18px; z-index: 200;
+      display: flex; background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border); border-radius: 20px; overflow: hidden;
+    }
+    .lang-btn {
+      padding: 6px 14px; font-size: 11px; font-family: var(--sans);
+      font-weight: 500; letter-spacing: 0.5px; cursor: pointer;
+      border: none; background: none; color: var(--muted); transition: all 0.2s;
+    }
+    .lang-btn.active { background: var(--violet); color: white; border-radius: 20px; }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 3px; background: rgba(255,255,255,0.08);
+    }
+    .progress-bar {
+      height: 100%; background: linear-gradient(90deg, var(--violet), var(--lavender));
+      transition: width 0.5s ease;
+    }
+
+    /* ── SHARED COMPONENTS ── */
+    .moon-small {
+      width: 52px; height: 52px; border-radius: 50%;
       background: radial-gradient(circle at 36% 36%, #fff9e6, #ffd97d 60%, #f4a020);
-      box-shadow: 0 0 40px 12px rgba(244,199,96,0.22), 0 0 80px 24px rgba(244,199,96,0.08);
-      animation: moonFloat 7s ease-in-out infinite; position: relative;
+      box-shadow: 0 0 30px 8px rgba(244,199,96,0.2);
+      animation: moonFloat 7s ease-in-out infinite;
+      position: relative; margin: 0 auto 20px;
     }
-    .moon::after {
+    .moon-small::after {
       content: ''; position: absolute; inset: 0; border-radius: 50%;
-      background: radial-gradient(circle at 65% 30%, rgba(255,255,255,0.18), transparent 55%);
+      background: radial-gradient(circle at 65% 30%, rgba(255,255,255,0.2), transparent 55%);
     }
 
-    h1 {
-      font-size: 34px; font-weight: normal; letter-spacing: -0.5px;
-      text-align: center; margin-bottom: 6px;
+    .screen-title {
+      font-family: var(--serif); font-size: 30px; font-weight: 300;
+      text-align: center; line-height: 1.2; margin-bottom: 8px;
+    }
+    .screen-sub {
+      font-size: 14px; color: var(--muted); text-align: center;
+      line-height: 1.6; margin-bottom: 36px; max-width: 360px; margin-left: auto; margin-right: auto;
+    }
+    .step-label {
+      font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--lavender); text-align: center; margin-bottom: 12px;
+    }
+
+    /* ── OPTION CARDS ── */
+    .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+    .option-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 16px; padding: 16px 20px;
+      cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 14px;
+    }
+    .option-card:hover { background: rgba(124,58,237,0.15); border-color: rgba(124,58,237,0.4); }
+    .option-card.selected { background: rgba(124,58,237,0.2); border-color: var(--violet); box-shadow: 0 0 0 1px var(--violet); }
+    .option-icon { font-size: 22px; flex-shrink: 0; width: 36px; text-align: center; }
+    .option-text { flex: 1; }
+    .option-title { font-size: 14px; font-weight: 500; margin-bottom: 2px; }
+    .option-desc { font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .option-check {
+      width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--border);
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      font-size: 11px; transition: all 0.2s;
+    }
+    .option-card.selected .option-check { background: var(--violet); border-color: var(--violet); }
+
+    /* ── BUTTONS ── */
+    .btn-primary {
+      width: 100%; background: linear-gradient(135deg, var(--violet), #4f46e5);
+      border: none; border-radius: 14px; padding: 17px;
+      color: white; font-family: var(--sans); font-size: 15px; font-weight: 500;
+      cursor: pointer; box-shadow: 0 6px 30px rgba(124,58,237,0.4);
+      transition: all 0.2s; letter-spacing: 0.2px;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(124,58,237,0.55); }
+    .btn-primary:disabled { background: rgba(255,255,255,0.1); box-shadow: none; cursor: default; transform: none; color: var(--muted); }
+    .btn-back {
+      background: none; border: none; color: var(--muted); cursor: pointer;
+      font-family: var(--sans); font-size: 13px; padding: 0; margin-bottom: 28px;
+      display: flex; align-items: center; gap: 6px; transition: color 0.2s;
+    }
+    .btn-back:hover { color: white; }
+
+    /* ── HOME SCREEN ── */
+    #screen-home { padding-top: 72px; padding-bottom: 48px; text-align: center; }
+    .home-moon {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: radial-gradient(circle at 36% 36%, #fff9e6, #ffd97d 60%, #f4a020);
+      box-shadow: 0 0 50px 16px rgba(244,199,96,0.22), 0 0 100px 30px rgba(244,199,96,0.08);
+      animation: moonFloat 7s ease-in-out infinite;
+      position: relative; margin: 0 auto 28px;
+    }
+    .home-moon::after {
+      content: ''; position: absolute; inset: 0; border-radius: 50%;
+      background: radial-gradient(circle at 65% 30%, rgba(255,255,255,0.2), transparent 55%);
+    }
+    .home-title {
+      font-family: var(--serif); font-size: 46px; font-weight: 300;
+      margin-bottom: 8px; letter-spacing: -0.5px;
       background: linear-gradient(135deg, #e0c3fc, #c4b5fd, #818cf8);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .subtitle { font-size: 11px; letter-spacing: 4px; color: #a78bfa; text-transform: uppercase; text-align: center; margin-bottom: 18px; }
-    .tagline { font-size: 15px; color: rgba(255,255,255,0.6); line-height: 1.65; text-align: center; max-width: 320px; margin: 0 auto 36px; }
-
-    .starters-label { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #7c3aed; margin-bottom: 13px; text-align: center; }
-    .starters { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin-bottom: 26px; }
-    .starter-btn {
-      background: rgba(255,255,255,0.045); border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 16px; padding: 17px 14px; color: white; cursor: pointer;
-      text-align: left; font-family: 'Georgia', serif; transition: all 0.2s;
+    .home-badge {
+      display: inline-block; font-size: 10px; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--lavender);
+      border: 1px solid rgba(167,139,250,0.3); border-radius: 20px;
+      padding: 5px 16px; margin-bottom: 20px;
+      background: rgba(167,139,250,0.07);
     }
-    .starter-btn:hover { background: rgba(124,58,237,0.18); border-color: rgba(124,58,237,0.45); }
-    .starter-emoji { font-size: 22px; margin-bottom: 8px; }
-    .starter-label { font-size: 12.5px; line-height: 1.4; color: rgba(255,255,255,0.78); }
+    .home-sub { font-size: 16px; color: var(--muted); line-height: 1.7; max-width: 340px; margin: 0 auto 48px; }
 
-    .or-text { font-size: 11px; color: rgba(255,255,255,0.28); margin-bottom: 11px; text-align: center; }
-    .input-row { display: flex; gap: 9px; }
-    .text-input {
-      flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.13);
-      border-radius: 12px; padding: 13px 15px; color: white; font-size: 13.5px; font-family: 'Georgia', serif;
+    .home-features { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 40px; }
+    .home-feature {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 18px 14px; text-align: center;
     }
-    .text-input:focus { outline: none; border-color: rgba(124,58,237,0.5); }
-    .send-btn {
-      background: linear-gradient(135deg, #7c3aed, #4f46e5); border: none; border-radius: 12px;
-      padding: 13px 18px; color: white; cursor: pointer; font-size: 17px;
-      box-shadow: 0 4px 18px rgba(124,58,237,0.4); transition: all 0.2s;
-    }
-    .send-btn:hover { transform: translateY(-1px); }
-    .send-btn:disabled { background: rgba(255,255,255,0.08); box-shadow: none; cursor: default; transform: none; }
+    .home-feature-icon { font-size: 24px; margin-bottom: 8px; }
+    .home-feature-title { font-size: 12px; font-weight: 500; margin-bottom: 4px; }
+    .home-feature-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
 
-    .topbar {
+    /* ── INTAKE SCREEN ── */
+    #screen-intake { padding-top: 60px; padding-bottom: 60px; }
+
+    /* ── LOADING SCREEN ── */
+    #screen-loading { padding-top: 120px; text-align: center; }
+    .loading-moon {
+      width: 70px; height: 70px; border-radius: 50%;
+      background: radial-gradient(circle at 36% 36%, #fff9e6, #ffd97d 60%, #f4a020);
+      box-shadow: 0 0 40px 12px rgba(244,199,96,0.22);
+      animation: moonFloat 2s ease-in-out infinite, pulse 2s ease-in-out infinite;
+      margin: 0 auto 32px;
+    }
+    .loading-text { font-size: 18px; color: var(--muted); margin-bottom: 12px; }
+    .loading-sub { font-size: 13px; color: rgba(255,255,255,0.3); }
+    .loading-dots { display: flex; gap: 6px; justify-content: center; margin-top: 24px; }
+    .loading-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--lavender); animation: bounce 1.2s ease-in-out infinite; }
+    .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    /* ── RESULT SCREEN ── */
+    #screen-result { padding-top: 60px; padding-bottom: 80px; }
+
+    .method-card {
+      background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(79,70,229,0.15));
+      border: 1px solid rgba(124,58,237,0.35); border-radius: 24px;
+      padding: 32px 28px; margin-bottom: 24px;
+    }
+    .method-badge {
+      display: inline-block; font-size: 10px; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--gold);
+      border: 1px solid rgba(244,199,96,0.3); border-radius: 20px;
+      padding: 4px 14px; margin-bottom: 16px; background: rgba(244,199,96,0.08);
+    }
+    .method-name { font-family: var(--serif); font-size: 28px; font-weight: 300; margin-bottom: 12px; }
+    .method-desc { font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.7; margin-bottom: 20px; }
+    .method-expectation {
+      background: rgba(255,255,255,0.06); border-radius: 12px; padding: 16px 18px;
+      font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.6;
+      border-left: 3px solid var(--gold);
+    }
+    .method-expectation strong { color: var(--gold); }
+
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .info-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 18px;
+    }
+    .info-card-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--lavender); margin-bottom: 8px; }
+    .info-card-value { font-size: 15px; font-weight: 500; }
+
+    /* ── PROGRAM SCREEN ── */
+    #screen-program { padding-top: 60px; padding-bottom: 80px; }
+
+    .program-header {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 24px; margin-bottom: 24px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .program-icon { font-size: 32px; }
+    .program-title { font-family: var(--serif); font-size: 22px; font-weight: 300; margin-bottom: 4px; }
+    .program-meta { font-size: 12px; color: var(--muted); }
+
+    .day-tabs {
+      display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto;
+      padding-bottom: 4px; scrollbar-width: none;
+    }
+    .day-tabs::-webkit-scrollbar { display: none; }
+    .day-tab {
+      flex-shrink: 0; padding: 8px 16px; border-radius: 20px;
+      font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+      border: 1px solid var(--border); background: var(--surface); color: var(--muted);
+    }
+    .day-tab.active { background: var(--violet); border-color: var(--violet); color: white; }
+    .day-tab.completed { background: rgba(74,222,128,0.15); border-color: rgba(74,222,128,0.3); color: #4ade80; }
+
+    .day-content { animation: fadeIn 0.3s ease-out; }
+    .day-title { font-family: var(--serif); font-size: 22px; font-weight: 300; margin-bottom: 6px; }
+    .day-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+
+    .instruction-block {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 20px; margin-bottom: 12px;
+    }
+    .instruction-time {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--lavender); margin-bottom: 8px;
+    }
+    .instruction-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .instruction-text { font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.7; }
+
+    .tip-block {
+      background: rgba(244,199,96,0.07); border: 1px solid rgba(244,199,96,0.2);
+      border-radius: 16px; padding: 18px; margin-bottom: 12px;
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .tip-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .tip-text { font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.6; }
+
+    .warning-block {
+      background: rgba(251,146,60,0.08); border: 1px solid rgba(251,146,60,0.2);
+      border-radius: 16px; padding: 18px; margin-bottom: 12px;
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .warning-text { font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.6; }
+
+    /* ── RESULT ACTIONS ── */
+    .result-actions { display: flex; flex-direction: column; gap: 10px; }
+
+    /* ── CHAT FALLBACK ── */
+    #screen-chat { padding-top: 0; padding: 0; max-width: 520px; }
+    #screen-chat.active { display: flex; flex-direction: column; height: 100vh; }
+    .chat-topbar {
       display: flex; align-items: center; gap: 11px; padding: 18px 20px 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-      background: rgba(7,5,15,0.7); backdrop-filter: blur(12px); flex-shrink: 0;
+      border-bottom: 1px solid var(--border);
+      background: rgba(7,5,15,0.8); backdrop-filter: blur(12px); flex-shrink: 0;
     }
-    .back-btn { background: none; border: none; color: rgba(255,255,255,0.45); cursor: pointer; font-size: 19px; padding: 0 6px 0 0; font-family: 'Georgia', serif; line-height: 1; }
-    .coach-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #4f46e5); display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 0 14px rgba(124,58,237,0.45); }
-    .coach-name { font-size: 14.5px; font-weight: bold; }
-    .coach-status { font-size: 10.5px; color: #a78bfa; letter-spacing: 1px; }
-
-    #messages { flex: 1; overflow-y: auto; padding: 22px 18px 14px; }
-    #messages::-webkit-scrollbar { width: 3px; }
-    #messages::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.35); border-radius: 2px; }
-
-    .msg-row { display: flex; margin-bottom: 14px; gap: 10px; align-items: flex-end; animation: fadeUp 0.3s ease-out; }
+    .chat-back { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 19px; padding: 0 6px 0 0; }
+    .chat-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--violet), #4f46e5); display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 0 14px rgba(124,58,237,0.4); flex-shrink: 0; }
+    .chat-name { font-size: 14px; font-weight: 600; }
+    .chat-status { font-size: 10px; color: var(--lavender); }
+    #chat-messages { flex: 1; overflow-y: auto; padding: 20px 20px 12px; }
+    #chat-messages::-webkit-scrollbar { width: 3px; }
+    #chat-messages::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.3); border-radius: 2px; }
+    .msg-row { display: flex; margin-bottom: 12px; gap: 9px; align-items: flex-end; animation: fadeUp 0.3s ease-out; }
     .msg-row.user { justify-content: flex-end; }
-    .msg-avatar { width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg, #7c3aed, #4f46e5); display: flex; align-items: center; justify-content: center; font-size: 16px; box-shadow: 0 0 14px rgba(124,58,237,0.45); }
-    .bubble { max-width: 74%; padding: 13px 17px; font-size: 14px; line-height: 1.65; white-space: pre-wrap; }
-    .bubble.assistant { border-radius: 18px 18px 18px 4px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); }
-    .bubble.user { border-radius: 18px 18px 4px 18px; background: linear-gradient(135deg, #7c3aed, #5b21b6); box-shadow: 0 4px 20px rgba(124,58,237,0.3); }
-
-    .typing-row { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; }
-    .typing-dots { display: flex; gap: 5px; padding: 14px 18px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px 18px 18px 4px; }
-    .dot { width: 7px; height: 7px; border-radius: 50%; background: #a78bfa; animation: bounce 1.2s ease-in-out infinite; }
+    .msg-avatar-sm { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; background: linear-gradient(135deg, var(--violet), #4f46e5); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .bubble { max-width: 76%; padding: 12px 16px; font-size: 14px; line-height: 1.65; white-space: pre-wrap; font-family: var(--sans); }
+    .bubble.assistant { border-radius: 16px 16px 16px 4px; background: rgba(255,255,255,0.07); border: 1px solid var(--border); }
+    .bubble.user { border-radius: 16px 16px 4px 16px; background: linear-gradient(135deg, var(--violet), #5b21b6); }
+    .typing-row { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; }
+    .typing-dots { display: flex; gap: 5px; padding: 12px 16px; background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 16px 16px 16px 4px; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lavender); animation: bounce 1.2s ease-in-out infinite; }
     .dot:nth-child(2) { animation-delay: 0.18s; }
     .dot:nth-child(3) { animation-delay: 0.36s; }
-
-    .error-msg { color: #f87171; font-size: 13px; text-align: center; padding: 6px 0; }
-
-    .input-bar { padding: 12px 18px 28px; flex-shrink: 0; border-top: 1px solid rgba(255,255,255,0.07); background: rgba(7,5,15,0.7); backdrop-filter: blur(12px); }
-    textarea.text-input { resize: none; line-height: 1.5; max-height: 110px; overflow-y: auto; }
+    .chat-input-bar { padding: 10px 16px 24px; border-top: 1px solid var(--border); background: rgba(7,5,15,0.8); backdrop-filter: blur(12px); flex-shrink: 0; }
+    .chat-input-row { display: flex; gap: 8px; align-items: flex-end; }
+    .chat-textarea { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; color: white; font-size: 14px; font-family: var(--sans); resize: none; line-height: 1.5; max-height: 100px; overflow-y: auto; }
+    .chat-textarea:focus { outline: none; border-color: rgba(124,58,237,0.5); }
+    .chat-send { background: linear-gradient(135deg, var(--violet), #4f46e5); border: none; border-radius: 12px; padding: 12px 16px; color: white; cursor: pointer; font-size: 16px; transition: all 0.2s; box-shadow: 0 4px 16px rgba(124,58,237,0.35); }
+    .chat-send:disabled { background: rgba(255,255,255,0.08); box-shadow: none; cursor: default; }
   </style>
 </head>
 <body>
 
 <div id="stars"></div>
+<div class="progress-wrap"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
+<div class="lang-toggle" id="lang-toggle">
+  <button class="lang-btn active" onclick="setLang('nl')">NL</button>
+  <button class="lang-btn" onclick="setLang('en')">EN</button>
+</div>
 
-<!-- HOME -->
-<div id="home">
-  <div class="moon-wrap"><div class="moon"></div></div>
-  <h1>SlaapCoach</h1>
-  <p class="subtitle">AI · slaaphulp voor ouders</p>
-  <p class="tagline">Jouw persoonlijke coach om je kind (3–8 jaar) zelfstandig te leren slapen.</p>
+<!-- ── SCREEN: HOME ── -->
+<div class="screen active" id="screen-home">
+  <div class="home-moon"></div>
+  <div class="home-badge" id="txt-badge">Persoonlijk slaapprogramma</div>
+  <h1 class="home-title">SlaapCoach AI</h1>
+  <p class="home-sub" id="txt-home-sub">Een gepersonaliseerd slaapprogramma voor je kind van 3–8 jaar. Geen generiek advies — een plan dat bij jóuw gezin past.</p>
 
-  <p class="starters-label">Wat is jouw situatie?</p>
-  <div class="starters">
-    <button class="starter-btn" onclick="startChat('Mijn kind wil niet alleen in slaap vallen en roept me steeds terug.')">
-      <div class="starter-emoji">😴</div><div class="starter-label">Niet alleen inslapen</div>
-    </button>
-    <button class="starter-btn" onclick="startChat('Mijn kind komt elke nacht naar ons bed.')">
-      <div class="starter-emoji">🌙</div><div class="starter-label">Naar ouders komen</div>
-    </button>
-    <button class="starter-btn" onclick="startChat('Elke avond is er een gevecht bij het naar bed gaan.')">
-      <div class="starter-emoji">😤</div><div class="starter-label">Bedtijd protest</div>
-    </button>
-    <button class="starter-btn" onclick="startChat('Mijn kind wordt veel te vroeg wakker, soms al om 5 uur.')">
-      <div class="starter-emoji">🌅</div><div class="starter-label">Vroeg wakker</div>
-    </button>
+  <div class="home-features">
+    <div class="home-feature">
+      <div class="home-feature-icon">💬</div>
+      <div class="home-feature-title" id="txt-f1-title">Intake</div>
+      <div class="home-feature-desc" id="txt-f1-desc">4 gerichte vragen over jouw situatie</div>
+    </div>
+    <div class="home-feature">
+      <div class="home-feature-icon">🎯</div>
+      <div class="home-feature-title" id="txt-f2-title">Methode</div>
+      <div class="home-feature-desc" id="txt-f2-desc">Persoonlijk advies met eerlijke verwachting</div>
+    </div>
+    <div class="home-feature">
+      <div class="home-feature-icon">📅</div>
+      <div class="home-feature-title" id="txt-f3-title">Programma</div>
+      <div class="home-feature-desc" id="txt-f3-desc">Dagelijkse instructies stap voor stap</div>
+    </div>
   </div>
 
-  <p class="or-text">of beschrijf je eigen situatie</p>
-  <div class="input-row">
-    <input id="home-input" type="text" class="text-input" placeholder="Bijv: mijn kind van 6 slaapt niet..."
-      onkeydown="if(event.key==='Enter'&&this.value.trim())startChat(this.value.trim())"/>
-    <button class="send-btn" onclick="var v=document.getElementById('home-input').value.trim();if(v)startChat(v)">→</button>
+  <button class="btn-primary" onclick="startIntake()" id="txt-start-btn">Start mijn programma →</button>
+</div>
+
+<!-- ── SCREEN: INTAKE ── -->
+<div class="screen" id="screen-intake">
+  <div style="padding-top: 60px; padding-bottom: 60px;">
+    <button class="btn-back" onclick="showScreen('home')" id="btn-back-intake">← <span id="txt-back">Terug</span></button>
+    <div id="intake-content"></div>
   </div>
 </div>
 
-<!-- CHAT -->
-<div id="chat" class="hidden">
-  <div class="topbar">
-    <button class="back-btn" onclick="goHome()">←</button>
-    <div class="coach-avatar">🌙</div>
+<!-- ── SCREEN: LOADING ── -->
+<div class="screen" id="screen-loading">
+  <div class="loading-moon"></div>
+  <p class="loading-text" id="txt-loading">Jouw programma wordt samengesteld...</p>
+  <p class="loading-sub" id="txt-loading-sub">Even geduld, dit duurt maar een moment</p>
+  <div class="loading-dots">
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+    <div class="loading-dot"></div>
+  </div>
+</div>
+
+<!-- ── SCREEN: RESULT ── -->
+<div class="screen" id="screen-result">
+  <div style="padding-top: 60px; padding-bottom: 60px;">
+    <button class="btn-back" onclick="showScreen('home')">← <span id="txt-back2">Terug</span></button>
+    <div id="result-content"></div>
+  </div>
+</div>
+
+<!-- ── SCREEN: PROGRAM ── -->
+<div class="screen" id="screen-program">
+  <div style="padding-top: 60px; padding-bottom: 80px;">
+    <button class="btn-back" onclick="showScreen('result')">← <span id="txt-back3">Terug</span></button>
+    <div id="program-content"></div>
+  </div>
+</div>
+
+<!-- ── SCREEN: CHAT ── -->
+<div class="screen" id="screen-chat">
+  <div class="chat-topbar">
+    <button class="chat-back" onclick="showScreen('result')">←</button>
+    <div class="chat-avatar">🌙</div>
     <div>
-      <div class="coach-name">SlaapCoach</div>
-      <div class="coach-status">● Online · AI slaapexpert</div>
+      <div class="chat-name">SlaapCoach AI</div>
+      <div class="chat-status" id="txt-chat-status">● Online · AI slaapexpert</div>
     </div>
   </div>
-  <div id="messages"></div>
-  <div class="input-bar">
-    <div class="input-row">
-      <textarea id="chat-input" class="text-input" rows="1"
-        placeholder="Stel je vraag... (Enter om te sturen)"
-        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
-      <button class="send-btn" onclick="sendMessage()">↑</button>
+  <div id="chat-messages"></div>
+  <div class="chat-input-bar">
+    <div class="chat-input-row">
+      <textarea class="chat-textarea" id="chat-input" rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"></textarea>
+      <button class="chat-send" onclick="sendChat()">↑</button>
     </div>
   </div>
 </div>
 
 <script>
-  const SYSTEM_PROMPT = `Je bent SlaapCoach — een warme, deskundige AI-slaapcoach speciaal voor ouders van kinderen tussen de 3 en 8 jaar. Je helpt ouders hun kinderen zelfstandig te leren slapen.
+// ═══════════════════════════════════════
+// TRANSLATIONS
+// ═══════════════════════════════════════
+const T = {
+  nl: {
+    badge: 'Persoonlijk slaapprogramma',
+    homeSub: 'Een gepersonaliseerd slaapprogramma voor je kind van 3–8 jaar. Geen generiek advies — een plan dat bij jóuw gezin past.',
+    f1Title: 'Intake', f1Desc: '4 gerichte vragen over jouw situatie',
+    f2Title: 'Methode', f2Desc: 'Persoonlijk advies met eerlijke verwachting',
+    f3Title: 'Programma', f3Desc: 'Dagelijkse instructies stap voor stap',
+    startBtn: 'Start mijn programma →',
+    back: 'Terug',
+    loading: 'Jouw programma wordt samengesteld...',
+    loadingSub: 'Even geduld, dit duurt maar een moment',
+    chatStatus: '● Online · AI slaapexpert',
+    chatPlaceholder: 'Stel een vraag...',
+    viewProgram: 'Bekijk dagelijks programma →',
+    askQuestion: 'Stel een vraag aan SlaapCoach AI',
+    restartBtn: 'Opnieuw beginnen',
+    dayLabel: 'Dag',
 
-Je communiceert altijd in het Nederlands. Je bent empathisch, geduldig en praktisch. Je geeft concrete, stap-voor-stap adviezen gebaseerd op bewezen slaapwetenschappen (zoals de "fading" methode, positieve bekrachtiging en slaaprituelen).
-
-Jouw aanpak:
-- Stel eerst 1-2 korte vragen om de situatie te begrijpen (leeftijd kind, het probleem, wat al geprobeerd is)
-- Geef daarna een persoonlijk, concreet slaapplan
-- Gebruik warme maar professionele taal
-- Houd antwoorden beknopt en overzichtelijk (gebruik bullet points of stappen waar nuttig)
-- Moedig ouders aan en erken dat dit uitdagend is
-
-Geef altijd praktische tips die ouders direct kunnen toepassen. Houd je eerste reactie kort en stel maximaal 2 vragen.`;
-
-  let messages = [];
-  let loading = false;
-
-  // Sterren genereren
-  const starsEl = document.getElementById('stars');
-  for (let i = 0; i < 60; i++) {
-    const s = document.createElement('div');
-    s.className = 'star';
-    const size = Math.random() * 2.2 + 0.8;
-    s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;opacity:${Math.random()*0.5+0.1};animation:twinkle ${(Math.random()*3+2).toFixed(1)}s ease-in-out infinite ${-(Math.random()*5).toFixed(1)}s`;
-    starsEl.appendChild(s);
-  }
-
-  function goHome() {
-    messages = [];
-    document.getElementById('home').classList.remove('hidden');
-    document.getElementById('chat').classList.add('hidden');
-    document.getElementById('messages').innerHTML = '';
-    document.getElementById('home-input').value = '';
-  }
-
-  function startChat(text) {
-    document.getElementById('home').classList.add('hidden');
-    document.getElementById('chat').classList.remove('hidden');
-    messages = [];
-    addMessage('user', text);
-    callAPI();
-    setTimeout(() => document.getElementById('chat-input').focus(), 300);
-  }
-
-  function sendMessage() {
-    const input = document.getElementById('chat-input');
-    const val = input.value.trim();
-    if (!val || loading) return;
-    input.value = '';
-    addMessage('user', val);
-    callAPI();
-  }
-
-  function addMessage(role, content) {
-    messages.push({ role, content });
-    renderMessages();
-  }
-
-  function renderMessages() {
-    const container = document.getElementById('messages');
-    container.innerHTML = '';
-    messages.forEach(msg => {
-      const row = document.createElement('div');
-      row.className = 'msg-row ' + msg.role;
-      if (msg.role === 'assistant') {
-        const av = document.createElement('div');
-        av.className = 'msg-avatar';
-        av.textContent = '🌙';
-        row.appendChild(av);
+    intake: [
+      {
+        id: 'age', step: 'Stap 1 van 4',
+        title: 'Hoe oud is je kind?',
+        sub: 'De leeftijd bepaalt welke aanpak het beste werkt.',
+        options: [
+          { icon: '🌱', title: '3–4 jaar', desc: 'Peuter / kleuter', value: '3-4' },
+          { icon: '⭐', title: '5–6 jaar', desc: 'Kleuterleeftijd', value: '5-6' },
+          { icon: '🌟', title: '7–8 jaar', desc: 'Schoolgaand kind', value: '7-8' },
+        ]
+      },
+      {
+        id: 'problem', step: 'Stap 2 van 4',
+        title: 'Wat is het slaapprobleem?',
+        sub: 'Kies het probleem dat het meest van toepassing is.',
+        options: [
+          { icon: '😴', title: 'Wil niet alleen inslapen', desc: 'Vraagt steeds om aanwezigheid, roept of huilt bij bedtijd', value: 'falling-asleep' },
+          { icon: '🌙', title: 'Komt \'s nachts naar ons bed', desc: 'Slaapt goed in maar stapt later ons bed in', value: 'night-waking' },
+          { icon: '🌅', title: 'Wordt te vroeg wakker', desc: 'Dag begint voor 6 uur, kan niet opnieuw inslapen', value: 'early-waking' },
+          { icon: '😤', title: 'Protest & weerstand bij bedtijd', desc: 'Verzet, onderhandelen, eindeloos uitstellen', value: 'bedtime-resistance' },
+        ]
+      },
+      {
+        id: 'crying', step: 'Stap 3 van 4',
+        title: 'Hoe sta je tegenover huilen?',
+        sub: 'Eerlijk antwoorden helpt ons de juiste methode te kiezen — geen goed of fout.',
+        options: [
+          { icon: '💚', title: 'Ik vind het oké', desc: 'Ik kan een tijdje wachten als mijn kind huilt, als het uiteindelijk helpt', value: 'ok' },
+          { icon: '💛', title: 'Liever zo min mogelijk', desc: 'Ik wil graag vermijden maar begrijp dat het soms voorkomt', value: 'minimal' },
+          { icon: '❤️', title: 'Absoluut niet', desc: 'Ik wil een methode waarbij mijn kind nauwelijks of niet huilt', value: 'no' },
+        ]
+      },
+      {
+        id: 'speed', step: 'Stap 4 van 4',
+        title: 'Hoe snel wil je resultaat?',
+        sub: 'Snellere methodes zijn vaak intensiever. Rustigere methodes kosten meer tijd maar zijn zachter.',
+        options: [
+          { icon: '⚡', title: 'Zo snel mogelijk', desc: 'Ik wil binnen 1–2 weken resultaat, ook als de aanpak intensief is', value: 'fast' },
+          { icon: '⚖️', title: 'Balans', desc: 'Redelijk snel (2–3 weken) maar wel geleidelijk', value: 'balanced' },
+          { icon: '🌿', title: 'Rustig en geleidelijk', desc: 'Ik neem de tijd, zachte aanpak is belangrijker dan snelheid', value: 'slow' },
+        ]
       }
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble ' + msg.role;
-      bubble.textContent = msg.content;
-      row.appendChild(bubble);
-      container.appendChild(row);
+    ],
+
+    systemPrompt: (answers) => `Je bent SlaapCoach AI, een AI-slaapcoach voor ouders van kinderen van 3-8 jaar. 
+
+De ouder heeft deze intake ingevuld:
+- Leeftijd kind: ${answers.age} jaar
+- Slaapprobleem: ${answers.problem}
+- Comfort met huilen: ${answers.crying}
+- Gewenste snelheid: ${answers.speed}
+
+Geef een GESTRUCTUREERD antwoord in dit EXACTE JSON formaat (geen markdown, alleen pure JSON):
+{
+  "method_name": "naam van de methode",
+  "method_tagline": "korte krachtige zin",
+  "method_description": "2-3 zinnen uitleg over de methode",
+  "expectation": "eerlijke verwachting: wanneer eerste verbetering, wanneer volledig resultaat",
+  "duration_weeks": 2,
+  "difficulty": "Zacht / Gemiddeld / Intensief",
+  "program": [
+    {
+      "day": 1,
+      "title": "Dag 1 titel",
+      "subtitle": "korte beschrijving van de dag",
+      "instructions": [
+        {"time": "Bedtijd", "title": "instructie titel", "text": "gedetailleerde uitleg wat de ouder precies moet doen"},
+        {"time": "Als kind huilt/roept", "title": "instructie titel", "text": "gedetailleerde uitleg"}
+      ],
+      "tip": "praktische tip voor deze dag",
+      "warning": "mogelijke uitdaging of wat normaal is vandaag"
+    }
+  ]
+}
+
+Geef 7 dagen in het programma. Maak de instructies HEEL CONCREET en PRAKTISCH — geen vage adviezen maar exacte handelingen. Vertel ouders letterlijk wat ze moeten zeggen en doen. Kies de methode op basis van de intake antwoorden.`,
+
+    chatSystem: (answers, method) => `Je bent SlaapCoach AI, een warme AI-slaapcoach. De ouder heeft een persoonlijk slaapprogramma ontvangen met de ${method} methode, gebaseerd op hun kind (${answers.age} jaar) met het probleem "${answers.problem}".
+
+Beantwoord vragen over het programma. Wees concreet, praktisch en bemoedigend. Maximaal 3 alinea's per antwoord.`
+  },
+
+  en: {
+    badge: 'Personal sleep program',
+    homeSub: 'A personalized sleep program for your child aged 3–8. No generic advice — a plan that fits your family.',
+    f1Title: 'Intake', f1Desc: '4 targeted questions about your situation',
+    f2Title: 'Method', f2Desc: 'Personal advice with honest expectations',
+    f3Title: 'Program', f3Desc: 'Daily step-by-step instructions',
+    startBtn: 'Start my program →',
+    back: 'Back',
+    loading: 'Your program is being prepared...',
+    loadingSub: 'Just a moment, this won\'t take long',
+    chatStatus: '● Online · AI sleep expert',
+    chatPlaceholder: 'Ask a question...',
+    viewProgram: 'View daily program →',
+    askQuestion: 'Ask SlaapCoach AI a question',
+    restartBtn: 'Start over',
+    dayLabel: 'Day',
+
+    intake: [
+      {
+        id: 'age', step: 'Step 1 of 4',
+        title: 'How old is your child?',
+        sub: "Your child's age determines which approach works best.",
+        options: [
+          { icon: '🌱', title: '3–4 years', desc: 'Toddler / preschooler', value: '3-4' },
+          { icon: '⭐', title: '5–6 years', desc: 'Kindergarten age', value: '5-6' },
+          { icon: '🌟', title: '7–8 years', desc: 'School age', value: '7-8' },
+        ]
+      },
+      {
+        id: 'problem', step: 'Step 2 of 4',
+        title: "What's the sleep problem?",
+        sub: 'Choose the problem that applies most.',
+        options: [
+          { icon: '😴', title: "Won't sleep alone", desc: 'Keeps asking for presence, calls out or cries at bedtime', value: 'falling-asleep' },
+          { icon: '🌙', title: 'Comes to our bed at night', desc: 'Falls asleep fine but moves to our bed later', value: 'night-waking' },
+          { icon: '🌅', title: 'Wakes up too early', desc: 'Day starts before 6am, cannot fall back asleep', value: 'early-waking' },
+          { icon: '😤', title: 'Bedtime protest & resistance', desc: 'Fighting, negotiating, endless stalling', value: 'bedtime-resistance' },
+        ]
+      },
+      {
+        id: 'crying', step: 'Step 3 of 4',
+        title: 'How do you feel about crying?',
+        sub: 'Answer honestly — this helps us pick the right method. No right or wrong.',
+        options: [
+          { icon: '💚', title: "I'm okay with it", desc: "I can wait a while if my child cries, if it ultimately helps", value: 'ok' },
+          { icon: '💛', title: 'As little as possible', desc: 'I prefer to avoid it but understand it may happen', value: 'minimal' },
+          { icon: '❤️', title: 'Absolutely not', desc: 'I want a method where my child barely or never cries', value: 'no' },
+        ]
+      },
+      {
+        id: 'speed', step: 'Step 4 of 4',
+        title: 'How quickly do you want results?',
+        sub: 'Faster methods are often more intensive. Gentler methods take longer but are softer.',
+        options: [
+          { icon: '⚡', title: 'As fast as possible', desc: 'I want results within 1–2 weeks, even if the approach is intensive', value: 'fast' },
+          { icon: '⚖️', title: 'Balanced', desc: 'Reasonably quick (2–3 weeks) but gradual', value: 'balanced' },
+          { icon: '🌿', title: 'Slow and gentle', desc: 'I take my time, gentle approach matters more than speed', value: 'slow' },
+        ]
+      }
+    ],
+
+    systemPrompt: (answers) => `You are SlaapCoach AI, an AI sleep coach for parents of children aged 3-8.
+
+The parent completed this intake:
+- Child's age: ${answers.age} years
+- Sleep problem: ${answers.problem}
+- Comfort with crying: ${answers.crying}
+- Desired speed: ${answers.speed}
+
+Provide a STRUCTURED response in this EXACT JSON format (no markdown, pure JSON only):
+{
+  "method_name": "name of the method",
+  "method_tagline": "short powerful phrase",
+  "method_description": "2-3 sentences explaining the method",
+  "expectation": "honest expectation: when first improvement, when full result",
+  "duration_weeks": 2,
+  "difficulty": "Gentle / Moderate / Intensive",
+  "program": [
+    {
+      "day": 1,
+      "title": "Day 1 title",
+      "subtitle": "brief description of the day",
+      "instructions": [
+        {"time": "Bedtime", "title": "instruction title", "text": "detailed explanation of exactly what the parent should do"},
+        {"time": "If child cries/calls", "title": "instruction title", "text": "detailed explanation"}
+      ],
+      "tip": "practical tip for this day",
+      "warning": "possible challenge or what is normal today"
+    }
+  ]
+}
+
+Provide 7 days in the program. Make instructions VERY CONCRETE and PRACTICAL — no vague advice but exact actions. Tell parents literally what to say and do. Choose the method based on the intake answers.`,
+
+    chatSystem: (answers, method) => `You are SlaapCoach AI, a warm AI sleep coach. The parent has received a personal sleep program using the ${method} method, based on their child (${answers.age} years) with the problem "${answers.problem}".
+
+Answer questions about the program. Be concrete, practical and encouraging. Maximum 3 paragraphs per answer.`
+  }
+};
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let lang = 'nl';
+let currentStep = 0;
+let answers = {};
+let programData = null;
+let currentDay = 0;
+let chatMessages = [];
+let chatLoading = false;
+
+// ═══════════════════════════════════════
+// STARS
+// ═══════════════════════════════════════
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 65; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const size = Math.random() * 2.2 + 0.8;
+  s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;opacity:${Math.random()*0.5+0.1};animation:twinkle ${(Math.random()*3+2).toFixed(1)}s ease-in-out infinite ${-(Math.random()*5).toFixed(1)}s`;
+  starsEl.appendChild(s);
+}
+
+// ═══════════════════════════════════════
+// LANGUAGE
+// ═══════════════════════════════════════
+function setLang(l) {
+  lang = l;
+  const t = T[l];
+  document.getElementById('txt-badge').textContent = t.badge;
+  document.getElementById('txt-home-sub').textContent = t.homeSub;
+  document.getElementById('txt-f1-title').textContent = t.f1Title;
+  document.getElementById('txt-f1-desc').textContent = t.f1Desc;
+  document.getElementById('txt-f2-title').textContent = t.f2Title;
+  document.getElementById('txt-f2-desc').textContent = t.f2Desc;
+  document.getElementById('txt-f3-title').textContent = t.f3Title;
+  document.getElementById('txt-f3-desc').textContent = t.f3Desc;
+  document.getElementById('txt-start-btn').textContent = t.startBtn;
+  document.getElementById('txt-back').textContent = t.back;
+  document.getElementById('txt-back2').textContent = t.back;
+  document.getElementById('txt-back3').textContent = t.back;
+  document.getElementById('txt-loading').textContent = t.loading;
+  document.getElementById('txt-loading-sub').textContent = t.loadingSub;
+  document.getElementById('txt-chat-status').textContent = t.chatStatus;
+  const ci = document.getElementById('chat-input');
+  if (ci) ci.placeholder = t.chatPlaceholder;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent === l.toUpperCase()));
+}
+
+// ═══════════════════════════════════════
+// SCREEN MANAGEMENT
+// ═══════════════════════════════════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+
+  const progMap = { home: 0, intake: 25, loading: 75, result: 90, program: 100, chat: 90 };
+  document.getElementById('progress-bar').style.width = (progMap[name] || 0) + '%';
+
+  // Hide lang toggle in chat
+  document.getElementById('lang-toggle').style.display = name === 'chat' ? 'none' : 'flex';
+}
+
+// ═══════════════════════════════════════
+// INTAKE
+// ═══════════════════════════════════════
+function startIntake() {
+  currentStep = 0;
+  answers = {};
+  showScreen('intake');
+  renderIntakeStep();
+}
+
+function renderIntakeStep() {
+  const t = T[lang];
+  const step = t.intake[currentStep];
+  const container = document.getElementById('intake-content');
+
+  container.innerHTML = `
+    <p class="step-label">${step.step}</p>
+    <h2 class="screen-title">${step.title}</h2>
+    <p class="screen-sub">${step.sub}</p>
+    <div class="options" id="options-list"></div>
+    <button class="btn-primary" id="next-btn" disabled onclick="nextStep()">${currentStep < t.intake.length - 1 ? (lang === 'nl' ? 'Volgende →' : 'Next →') : (lang === 'nl' ? 'Maak mijn programma →' : 'Create my program →')}</button>
+  `;
+
+  const list = document.getElementById('options-list');
+  step.options.forEach(opt => {
+    const card = document.createElement('div');
+    card.className = 'option-card';
+    card.innerHTML = `
+      <div class="option-icon">${opt.icon}</div>
+      <div class="option-text">
+        <div class="option-title">${opt.title}</div>
+        <div class="option-desc">${opt.desc}</div>
+      </div>
+      <div class="option-check">✓</div>
+    `;
+    card.onclick = () => selectOption(step.id, opt.value, card);
+    list.appendChild(card);
+  });
+
+  // Progress bar within intake
+  const pct = ((currentStep + 1) / t.intake.length) * 60 + 15;
+  document.getElementById('progress-bar').style.width = pct + '%';
+}
+
+function selectOption(id, value, card) {
+  document.querySelectorAll('#options-list .option-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  answers[id] = value;
+  document.getElementById('next-btn').disabled = false;
+}
+
+function nextStep() {
+  const t = T[lang];
+  if (currentStep < t.intake.length - 1) {
+    currentStep++;
+    renderIntakeStep();
+  } else {
+    generateProgram();
+  }
+}
+
+// ═══════════════════════════════════════
+// GENERATE PROGRAM
+// ═══════════════════════════════════════
+async function generateProgram() {
+  showScreen('loading');
+  const t = T[lang];
+  try {
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: t.systemPrompt(answers),
+        messages: [{ role: 'user', content: lang === 'nl' ? 'Maak mijn persoonlijke slaapprogramma.' : 'Create my personal sleep program.' }]
+      })
     });
-
-    if (loading) {
-      const tr = document.createElement('div');
-      tr.className = 'typing-row';
-      tr.innerHTML = `<div class="msg-avatar">🌙</div><div class="typing-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
-      container.appendChild(tr);
-    }
-    container.scrollTop = container.scrollHeight;
+    const data = await res.json();
+    const raw = data.content?.[0]?.text || '';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    programData = JSON.parse(clean);
+    currentDay = 0;
+    renderResult();
+    showScreen('result');
+  } catch (e) {
+    alert(lang === 'nl' ? 'Er ging iets mis. Probeer het opnieuw.' : 'Something went wrong. Please try again.');
+    showScreen('intake');
   }
+}
 
-  async function callAPI() {
-    loading = true;
-    renderMessages();
-    try {
-      // Roept onze eigen Vercel backend aan — API key staat veilig op de server
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages, system: SYSTEM_PROMPT })
-      });
-      const data = await res.json();
-      const text = data.content?.[0]?.text || 'Er ging iets mis. Probeer het opnieuw.';
-      messages.push({ role: 'assistant', content: text });
-    } catch (e) {
-      messages.push({ role: 'assistant', content: '❌ Verbinding mislukt. Controleer je internetverbinding en probeer opnieuw.' });
+// ═══════════════════════════════════════
+// RENDER RESULT
+// ═══════════════════════════════════════
+function renderResult() {
+  const t = T[lang];
+  const p = programData;
+  const container = document.getElementById('result-content');
+
+  const diffColor = { 'Zacht': '#4ade80', 'Gentle': '#4ade80', 'Gemiddeld': '#fbbf24', 'Moderate': '#fbbf24', 'Intensief': '#f87171', 'Intensive': '#f87171' };
+  const col = diffColor[p.difficulty] || '#a78bfa';
+
+  container.innerHTML = `
+    <p class="step-label">✦ ${lang === 'nl' ? 'Jouw aanbeveling' : 'Your recommendation'}</p>
+    <div class="method-card">
+      <div class="method-badge">✦ ${lang === 'nl' ? 'Aanbevolen methode' : 'Recommended method'}</div>
+      <h2 class="method-name">${p.method_name}</h2>
+      <p class="method-desc">${p.method_description}</p>
+      <div class="method-expectation">
+        <strong>💬 ${lang === 'nl' ? 'Wat je kunt verwachten' : 'What to expect'}:</strong><br/>
+        ${p.expectation}
+      </div>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-card-label">⏱ ${lang === 'nl' ? 'Duur' : 'Duration'}</div>
+        <div class="info-card-value">${p.duration_weeks} ${lang === 'nl' ? 'weken' : 'weeks'}</div>
+      </div>
+      <div class="info-card">
+        <div class="info-card-label">📊 ${lang === 'nl' ? 'Intensiteit' : 'Intensity'}</div>
+        <div class="info-card-value" style="color:${col}">${p.difficulty}</div>
+      </div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn-primary" onclick="showProgramScreen()">${t.viewProgram}</button>
+      <button class="btn-primary" style="background:rgba(255,255,255,0.07);box-shadow:none;border:1px solid rgba(255,255,255,0.15);" onclick="openChat()">${t.askQuestion}</button>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════
+// RENDER PROGRAM
+// ═══════════════════════════════════════
+function showProgramScreen() {
+  renderProgram();
+  showScreen('program');
+}
+
+function renderProgram() {
+  const t = T[lang];
+  const p = programData;
+  const container = document.getElementById('program-content');
+
+  let tabsHTML = p.program.map((day, i) => `
+    <div class="day-tab ${i === currentDay ? 'active' : ''}" onclick="selectDay(${i})">${t.dayLabel} ${day.day}</div>
+  `).join('');
+
+  container.innerHTML = `
+    <p class="step-label">📅 ${lang === 'nl' ? 'Dagelijks programma' : 'Daily program'}</p>
+    <div class="program-header">
+      <div class="program-icon">🌙</div>
+      <div>
+        <div class="program-title">${p.method_name}</div>
+        <div class="program-meta">${p.duration_weeks} ${lang === 'nl' ? 'weken' : 'weeks'} · 7 ${lang === 'nl' ? 'dagen uitgewerkt' : 'days planned'}</div>
+      </div>
+    </div>
+    <div class="day-tabs">${tabsHTML}</div>
+    <div id="day-content"></div>
+  `;
+
+  renderDay(currentDay);
+}
+
+function selectDay(i) {
+  currentDay = i;
+  document.querySelectorAll('.day-tab').forEach((tab, idx) => {
+    tab.classList.toggle('active', idx === i);
+  });
+  renderDay(i);
+}
+
+function renderDay(i) {
+  const t = T[lang];
+  const day = programData.program[i];
+  const container = document.getElementById('day-content');
+
+  const instructionsHTML = day.instructions.map(inst => `
+    <div class="instruction-block">
+      <div class="instruction-time">${inst.time}</div>
+      <div class="instruction-title">${inst.title}</div>
+      <div class="instruction-text">${inst.text}</div>
+    </div>
+  `).join('');
+
+  container.innerHTML = `
+    <div class="day-content">
+      <h3 class="day-title">${day.title}</h3>
+      <p class="day-subtitle">${day.subtitle}</p>
+      ${instructionsHTML}
+      ${day.tip ? `<div class="tip-block"><div class="tip-icon">💡</div><div class="tip-text"><strong>${lang === 'nl' ? 'Tip' : 'Tip'}:</strong> ${day.tip}</div></div>` : ''}
+      ${day.warning ? `<div class="warning-block"><div class="tip-icon">⚠️</div><div class="warning-text"><strong>${lang === 'nl' ? 'Let op' : 'Note'}:</strong> ${day.warning}</div></div>` : ''}
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════
+// CHAT
+// ═══════════════════════════════════════
+function openChat() {
+  chatMessages = [];
+  document.getElementById('chat-messages').innerHTML = '';
+  document.getElementById('chat-input').placeholder = T[lang].chatPlaceholder;
+  showScreen('chat');
+  setTimeout(() => document.getElementById('chat-input').focus(), 300);
+}
+
+function sendChat() {
+  const input = document.getElementById('chat-input');
+  const val = input.value.trim();
+  if (!val || chatLoading) return;
+  input.value = '';
+  chatMessages.push({ role: 'user', content: val });
+  renderChat();
+  callChatAPI();
+}
+
+function renderChat() {
+  const container = document.getElementById('chat-messages');
+  container.innerHTML = '';
+  chatMessages.forEach(msg => {
+    const row = document.createElement('div');
+    row.className = 'msg-row ' + msg.role;
+    if (msg.role === 'assistant') {
+      const av = document.createElement('div');
+      av.className = 'msg-avatar-sm'; av.textContent = '🌙';
+      row.appendChild(av);
     }
-    loading = false;
-    renderMessages();
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble ' + msg.role;
+    bubble.textContent = msg.content;
+    row.appendChild(bubble);
+    container.appendChild(row);
+  });
+  if (chatLoading) {
+    const tr = document.createElement('div');
+    tr.className = 'typing-row';
+    tr.innerHTML = `<div class="msg-avatar-sm">🌙</div><div class="typing-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>`;
+    container.appendChild(tr);
   }
+  container.scrollTop = container.scrollHeight;
+}
+
+async function callChatAPI() {
+  chatLoading = true; renderChat();
+  try {
+    const t = T[lang];
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: t.chatSystem(answers, programData?.method_name || ''),
+        messages: chatMessages
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || (lang === 'nl' ? 'Er ging iets mis.' : 'Something went wrong.');
+    chatMessages.push({ role: 'assistant', content: text });
+  } catch {
+    chatMessages.push({ role: 'assistant', content: lang === 'nl' ? '❌ Verbinding mislukt.' : '❌ Connection failed.' });
+  }
+  chatLoading = false; renderChat();
+}
+
+// ── INIT ──
+setLang('nl');
 </script>
 </body>
 </html>
