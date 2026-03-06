@@ -747,27 +747,35 @@ async function generateProgram() {
   showScreen('loading');
   const t = T[lang];
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 29000);
     const res = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
       body: JSON.stringify({
         system: t.systemPrompt(answers),
         messages: [{ role: 'user', content: lang === 'nl' ? 'Maak mijn persoonlijke slaapprogramma.' : 'Create my personal sleep program.' }]
       })
     });
+    clearTimeout(timeout);
     const data = await res.json();
     const raw = data.content?.[0]?.text || '';
-    // Strip markdown code fences and find the JSON object
-    const clean = raw.replace(/```json|```/g, '').trim();
+    const clean = raw.replace(/```json\n?|```/g, '').trim();
     const jsonStart = clean.indexOf('{');
     const jsonEnd = clean.lastIndexOf('}');
+    if (jsonStart === -1) throw new Error('Geen JSON');
     const jsonStr = clean.substring(jsonStart, jsonEnd + 1);
     programData = JSON.parse(jsonStr);
+    if (!programData.program || !Array.isArray(programData.program)) throw new Error('Ongeldig formaat');
     currentDay = 0;
     renderResult();
     showScreen('result');
   } catch (e) {
-    alert(lang === 'nl' ? 'Er ging iets mis. Probeer het opnieuw.' : 'Something went wrong. Please try again.');
+    const msg = e.name === 'AbortError'
+      ? (lang === 'nl' ? 'Het duurde te lang. Probeer het opnieuw.' : 'Took too long. Please try again.')
+      : (lang === 'nl' ? 'Er ging iets mis. Probeer het opnieuw.' : 'Something went wrong. Please try again.');
+    alert(msg);
     showScreen('intake');
   }
 }
