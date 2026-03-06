@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SleepCoach — Help Your Child Sleep Independently</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --night: #07050f;
+      --deep: #0e0a1f;
+      --indigo: #1a1040;
+      --violet: #4f2f9f;
+      --lavender: #a78bfa;
+      --pale: #e8e0ff;
+      --gold: #f4c760;
+      --cream: #fdf6e3;
+      --muted: rgba(255,255,255,0.45);
+    }
+
+    html { scroll-behavior: smooth; }
+    body { background: var(--night); color: white; font-family: 'DM Sans', sans-serif; font-weight: 300; overflow-x: hidden; }
+
+    .stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+    .star { position: absolute; border-radius: 50%; background: white; animation: twinkle var(--d, 3s) ease-in-out infinite var(--delay, 0s); }
+    @keyframes twinkle { 0%,100%{opacity:.08} 50%{opacity:.7} }
+
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 24px 48px; background: linear-gradient(to bottom, rgba(7,5,15,0.95), transparent); }
+    .logo { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; letter-spacing: 1px; }
+    .logo span { color: var(--gold); }
+    .nav-cta { background: transparent; border: 1px solid rgba(255,255,255,0.25); color: white; padding: 10px 24px; border-radius: 40px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.3s; text-decoration: none; letter-spacing: 0.5px; }
+    .nav-cta:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.5); }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .lang-switch { display: flex; align-items: center; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 40px; overflow: hidden; font-size: 12px; letter-spacing: 0.5px; }
+    .lang-switch a { padding: 8px 14px; color: rgba(255,255,255,0.45); text-decoration: none; transition: all 0.2s; }
+    .lang-switch a.active { background: rgba(167,139,250,0.25); color: white; border-radius: 40px; }
+    .lang-switch a:hover:not(.active) { color: white; }
+
+    .hero { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 120px 24px 80px; background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(79,47,159,0.35) 0%, transparent 70%); }
+    .moon { width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle at 38% 38%, #fff9e6, #ffd97d 60%, #f4a020); box-shadow: 0 0 60px 20px rgba(244,199,96,0.2), 0 0 120px 40px rgba(244,199,96,0.08); margin-bottom: 48px; animation: moonFloat 7s ease-in-out infinite; position: relative; }
+    .moon::after { content: ''; position: absolute; inset: 0; border-radius: 50%; background: radial-gradient(circle at 65% 35%, rgba(255,255,255,0.15), transparent 60%); }
+    @keyframes moonFloat { 0%,100%{transform:translateY(0) rotate(-2deg)} 50%{transform:translateY(-12px) rotate(2deg)} }
+
+    .badge { display: inline-block; border: 1px solid rgba(167,139,250,0.4); color: var(--lavender); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; padding: 6px 20px; border-radius: 40px; margin-bottom: 28px; background: rgba(167,139,250,0.07); animation: fadeUp 1s ease-out 0.2s both; }
+    h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(44px, 8vw, 86px); font-weight: 300; line-height: 1.05; letter-spacing: -1px; max-width: 760px; margin-bottom: 28px; animation: fadeUp 1s ease-out 0.4s both; }
+    h1 em { font-style: italic; background: linear-gradient(135deg, var(--gold), #ffb347); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    .hero-sub { font-size: 17px; color: var(--muted); max-width: 480px; line-height: 1.7; margin-bottom: 48px; animation: fadeUp 1s ease-out 0.6s both; }
+    .cta-group { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; animation: fadeUp 1s ease-out 0.8s both; }
+    .btn-primary { background: linear-gradient(135deg, #7c3aed, #4f2f9f); color: white; border: none; padding: 18px 40px; border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 15px; cursor: pointer; box-shadow: 0 8px 40px rgba(124,58,237,0.45); transition: all 0.3s; text-decoration: none; display: inline-block; letter-spacing: 0.3px; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 50px rgba(124,58,237,0.6); }
+    .btn-ghost { background: transparent; color: var(--muted); border: 1px solid rgba(255,255,255,0.15); padding: 18px 40px; border-radius: 50px; font-family: 'DM Sans', sans-serif; font-size: 15px; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block; }
+    .btn-ghost:hover { color: white; border-color: rgba(255,255,255,0.4); }
+
+    .scroll-hint { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; color: rgba(255,255,255,0.25); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; animation: fadeUp 1s ease-out 1.4s both; }
+    .scroll-arrow { width: 1px; height: 40px; background: linear-gradient(to bottom, transparent, rgba(255,255,255,0.3)); }
+
+    .social-proof { position: relative; z-index: 1; display: flex; justify-content: center; align-items: center; gap: 12px; padding: 20px 24px; border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .avatars { display: flex; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--night); margin-left: -8px; font-size: 16px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #4f2f9f, #1a1040); }
+    .avatars .avatar:first-child { margin-left: 0; }
+    .social-text { font-size: 13px; color: var(--muted); }
+    .social-text strong { color: white; font-weight: 500; }
+
+    .section { position: relative; z-index: 1; padding: 100px 24px; }
+    .section-inner { max-width: 1100px; margin: 0 auto; }
+
+    .problem { background: linear-gradient(135deg, rgba(14,10,31,0.8), rgba(26,16,64,0.6)); border: 1px solid rgba(255,255,255,0.07); border-radius: 32px; padding: 80px 60px; }
+    .problem-label { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--lavender); margin-bottom: 32px; }
+    .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    .problem h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(32px, 4vw, 52px); font-weight: 300; line-height: 1.15; margin-bottom: 24px; }
+    .problem h2 em { font-style: italic; color: var(--gold); }
+    .problem-body { color: var(--muted); line-height: 1.8; font-size: 16px; }
+    .pain-list { list-style: none; display: flex; flex-direction: column; gap: 16px; }
+    .pain-list li { display: flex; align-items: flex-start; gap: 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 20px 24px; font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.5; }
+    .pain-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+
+    .how { text-align: center; }
+    .section-label { font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--lavender); margin-bottom: 20px; display: block; }
+    .how h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(36px, 5vw, 60px); font-weight: 300; margin-bottom: 16px; line-height: 1.1; }
+    .how-sub { color: var(--muted); font-size: 16px; max-width: 440px; margin: 0 auto 72px; line-height: 1.7; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .step { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 40px 32px; position: relative; overflow: hidden; transition: all 0.3s; }
+    .step:hover { background: rgba(79,47,159,0.15); border-color: rgba(167,139,250,0.3); transform: translateY(-4px); }
+    .step::before { content: attr(data-num); position: absolute; top: 24px; right: 28px; font-family: 'Cormorant Garamond', serif; font-size: 80px; font-weight: 300; line-height: 1; color: rgba(255,255,255,0.04); pointer-events: none; }
+    .step-icon { font-size: 36px; margin-bottom: 24px; display: block; }
+    .step h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 400; margin-bottom: 12px; }
+    .step p { color: var(--muted); font-size: 14px; line-height: 1.7; }
+
+    .chat-inserts { position: relative; z-index: 1; padding: 0 24px 80px; }
+    .chat-inserts-inner { max-width: 680px; margin: 0 auto; }
+    .chat-inserts-label { text-align: center; margin-bottom: 12px; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: var(--lavender); display: block; }
+    .chat-inserts-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(28px, 4vw, 42px); font-weight: 300; text-align: center; margin-bottom: 8px; line-height: 1.15; }
+    .chat-inserts-sub { color: var(--muted); font-size: 15px; text-align: center; margin-bottom: 48px; line-height: 1.6; }
+    .chat-scenarios { display: flex; flex-direction: column; gap: 28px; }
+    .chat-card { background: rgba(14, 10, 31, 0.85); border-radius: 20px; overflow: hidden; border: 1px solid rgba(167, 139, 250, 0.14); box-shadow: 0 8px 40px rgba(0,0,0,0.35), 0 0 60px rgba(79,47,159,0.06); transition: all 0.3s; }
+    .chat-card:hover { border-color: rgba(167,139,250,0.28); transform: translateY(-3px); box-shadow: 0 12px 50px rgba(0,0,0,0.4); }
+    .chat-header { padding: 12px 20px; background: rgba(79, 47, 159, 0.18); border-bottom: 1px solid rgba(167,139,250,0.1); display: flex; align-items: center; gap: 10px; }
+    .chat-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--lavender); box-shadow: 0 0 6px var(--lavender); animation: pulse 2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+    .chat-header-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--lavender); opacity: 0.65; }
+    .chat-body { padding: 22px 20px; display: flex; flex-direction: column; gap: 14px; }
+    .bubble { padding: 13px 17px; border-radius: 16px; font-size: 14px; line-height: 1.6; max-width: 82%; }
+    .bubble-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--lavender); opacity: 0.5; margin-bottom: 5px; }
+    .bubble.parent { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.85); align-self: flex-end; border-bottom-right-radius: 4px; }
+    .bubble.ai { background: rgba(79,47,159,0.28); border: 1px solid rgba(167,139,250,0.2); color: rgba(255,255,255,0.92); align-self: flex-start; border-bottom-left-radius: 4px; }
+    .bubble.ai em { color: var(--lavender); font-style: italic; }
+
+    .features { background: radial-gradient(ellipse 70% 50% at 50% 50%, rgba(79,47,159,0.15) 0%, transparent 70%); }
+    .features h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(36px, 5vw, 60px); font-weight: 300; text-align: center; margin-bottom: 64px; line-height: 1.1; }
+    .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .feature-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 36px; transition: all 0.3s; }
+    .feature-card:hover { background: rgba(79,47,159,0.12); border-color: rgba(167,139,250,0.25); }
+    .feature-card.large { grid-column: span 2; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+    .feature-icon { font-size: 28px; margin-bottom: 20px; display: block; }
+    .feature-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 400; margin-bottom: 12px; }
+    .feature-card p { color: var(--muted); font-size: 14px; line-height: 1.7; }
+
+    .testimonials { text-align: center; }
+    .testimonials h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(36px, 5vw, 56px); font-weight: 300; margin-bottom: 64px; }
+    .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .testi { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 24px; padding: 36px; text-align: left; }
+    .stars-row { color: var(--gold); font-size: 14px; margin-bottom: 16px; letter-spacing: 2px; }
+    .testi-text { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 300; font-style: italic; line-height: 1.6; margin-bottom: 24px; color: rgba(255,255,255,0.85); }
+    .testi-author { display: flex; align-items: center; gap: 12px; }
+    .testi-avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #4f2f9f, #7c3aed); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .testi-name { font-size: 13px; font-weight: 500; }
+    .testi-role { font-size: 12px; color: var(--muted); }
+
+    .pricing { text-align: center; }
+    .pricing h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(36px, 5vw, 56px); font-weight: 300; margin-bottom: 16px; }
+    .pricing-sub { color: var(--muted); font-size: 16px; margin-bottom: 56px; }
+    .price-card { max-width: 420px; margin: 0 auto; background: linear-gradient(135deg, rgba(79,47,159,0.3), rgba(26,16,64,0.5)); border: 1px solid rgba(167,139,250,0.3); border-radius: 32px; padding: 56px 48px; position: relative; overflow: hidden; }
+    .price-card::before { content: ''; position: absolute; top: -60px; right: -60px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(167,139,250,0.15), transparent); pointer-events: none; }
+    .price-badge { display: inline-block; background: rgba(244,199,96,0.15); border: 1px solid rgba(244,199,96,0.3); color: var(--gold); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; padding: 6px 16px; border-radius: 40px; margin-bottom: 32px; }
+    .price-amount { font-family: 'Cormorant Garamond', serif; font-size: 72px; font-weight: 300; line-height: 1; margin-bottom: 4px; }
+    .price-amount sup { font-size: 28px; vertical-align: top; margin-top: 16px; }
+    .price-once { color: var(--muted); font-size: 14px; margin-bottom: 40px; }
+    .price-features { list-style: none; display: flex; flex-direction: column; gap: 14px; margin-bottom: 40px; text-align: left; }
+    .price-features li { display: flex; align-items: center; gap: 12px; font-size: 14px; color: rgba(255,255,255,0.8); }
+    .check { color: var(--lavender); font-size: 16px; flex-shrink: 0; }
+    .btn-primary-large { width: 100%; background: linear-gradient(135deg, #7c3aed, #4f2f9f); color: white; border: none; padding: 20px; border-radius: 16px; font-family: 'DM Sans', sans-serif; font-size: 16px; cursor: pointer; box-shadow: 0 8px 40px rgba(124,58,237,0.4); transition: all 0.3s; letter-spacing: 0.3px; }
+    .btn-primary-large:hover { transform: translateY(-2px); box-shadow: 0 12px 50px rgba(124,58,237,0.6); }
+    .price-note { font-size: 12px; color: var(--muted); margin-top: 20px; }
+
+    .cta-banner { position: relative; z-index: 1; margin: 0 24px 100px; background: linear-gradient(135deg, rgba(79,47,159,0.4), rgba(26,16,64,0.7)); border: 1px solid rgba(167,139,250,0.2); border-radius: 32px; padding: 80px 48px; text-align: center; overflow: hidden; }
+    .cta-banner::before { content: '🌙'; position: absolute; font-size: 200px; opacity: 0.04; top: -20px; right: -20px; pointer-events: none; }
+    .cta-banner h2 { font-family: 'Cormorant Garamond', serif; font-size: clamp(36px, 5vw, 56px); font-weight: 300; margin-bottom: 16px; line-height: 1.1; }
+    .cta-banner p { color: var(--muted); font-size: 16px; margin-bottom: 40px; }
+
+    footer { position: relative; z-index: 1; border-top: 1px solid rgba(255,255,255,0.07); padding: 40px 48px; display: flex; align-items: center; justify-content: space-between; color: var(--muted); font-size: 13px; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 768px) {
+      nav { padding: 20px 24px; }
+      .problem { padding: 48px 28px; }
+      .problem-grid { grid-template-columns: 1fr; gap: 40px; }
+      .steps { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .feature-card.large { grid-column: span 1; grid-template-columns: 1fr; }
+      .testi-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 16px; text-align: center; }
+      .social-proof { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+
+<nav>
+  <div class="logo">Sleep<span>Coach</span> <span style="opacity:0.4; font-size:14px;">✦</span> AI</div>
+  <div class="nav-right">
+    <div class="lang-switch">
+      <a href="index.html">NL</a>
+      <a href="index_en.html" class="active">EN</a>
+    </div>
+    <a href="app.html" class="nav-cta">Start today →</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="moon"></div>
+  <div class="badge">AI-powered sleep help for parents</div>
+  <h1>Finally a <em>peaceful night</em> for the whole family</h1>
+  <p class="hero-sub">SleepCoach guides you step by step so your child aged 3–8 learns to sleep independently — without endless battles, without expensive coaches.</p>
+  <div class="cta-group">
+    <a href="app.html" class="btn-primary">Try free for 7 days</a>
+    <a href="#how-it-works" class="btn-ghost">How does it work?</a>
+  </div>
+  <div class="scroll-hint">
+    <div class="scroll-arrow"></div>
+    scroll
+  </div>
+</section>
+
+<div class="social-proof">
+  <div class="avatars">
+    <div class="avatar">👩</div>
+    <div class="avatar">👨</div>
+    <div class="avatar">👩</div>
+    <div class="avatar">👨</div>
+    <div class="avatar">👩</div>
+  </div>
+  <p class="social-text"><strong>Over 1,200 parents</strong> are already sleeping better with SleepCoach</p>
+  <div style="color: #f4c760; font-size: 13px; letter-spacing: 2px;">★★★★★</div>
+</div>
+
+<section class="section">
+  <div class="section-inner">
+    <div class="problem reveal">
+      <p class="problem-label">✦ Sound familiar?</p>
+      <div class="problem-grid">
+        <div>
+          <h2>Sleep deprivation makes <em>everything</em> harder</h2>
+          <p class="problem-body">The same struggle every evening. Back to the bedroom again and again. Waking up exhausted. You know something has to change — but how? Professional sleep coaches cost hundreds of euros. And online you find nothing but conflicting advice.</p>
+        </div>
+        <ul class="pain-list">
+          <li><span class="pain-icon">😮‍💨</span> My child won't fall asleep alone and keeps calling for me</li>
+          <li><span class="pain-icon">🌙</span> Every night my child ends up in our bed</li>
+          <li><span class="pain-icon">😤</span> Bedtime is a battle every single evening</li>
+          <li><span class="pain-icon">⏰</span> My child is already standing next to my bed at 5 AM</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section how" id="how-it-works">
+  <div class="section-inner">
+    <span class="section-label">✦ How it works</span>
+    <h2>Three steps to peaceful nights</h2>
+    <p class="how-sub">No complicated manual. Just a conversation with your personal AI sleep coach.</p>
+    <div class="steps">
+      <div class="step reveal" data-num="1">
+        <span class="step-icon">💬</span>
+        <h3>Tell us your situation</h3>
+        <p>Describe what's going on: your child's age, the sleep problem, what you've already tried. SleepCoach listens and asks targeted questions.</p>
+      </div>
+      <div class="step reveal" data-num="2" style="transition-delay:0.15s">
+        <span class="step-icon">🌙</span>
+        <h3>Receive your sleep plan</h3>
+        <p>You get a personalised, step-by-step sleep plan based on proven methods like the fading technique and positive reinforcement.</p>
+      </div>
+      <div class="step reveal" data-num="3" style="transition-delay:0.3s">
+        <span class="step-icon">⭐</span>
+        <h3>Apply it and enjoy</h3>
+        <p>Follow the plan and ask questions whenever you're stuck. SleepCoach is available 24/7 — even at 3 AM when you need help most.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CHAT INSERTS -->
+<div class="chat-inserts">
+  <div class="chat-inserts-inner">
+    <span class="chat-inserts-label">✦ See it in action</span>
+    <h2 class="chat-inserts-title">Type what's happening.<br/>We'll tell you what to do.</h2>
+    <p class="chat-inserts-sub">No searching, no second-guessing. Just type what you see — and know exactly what to do next.</p>
+
+    <div class="chat-scenarios">
+
+      <div class="chat-card reveal">
+        <div class="chat-header"><div class="chat-dot"></div><span class="chat-header-label">Live conversation</span></div>
+        <div class="chat-body">
+          <div class="bubble parent">
+            <div class="bubble-label">You</div>
+            He's up now and calling from his room.
+          </div>
+          <div class="bubble ai">
+            <div class="bubble-label">SleepCoach</div>
+            Go to him calmly. Lay him back down — no talking, no lights. Say only: <em>"It's nighttime, time to sleep."</em> Then leave right away. If he calls again, wait 3 minutes before going back.
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-card reveal" style="transition-delay:0.12s">
+        <div class="chat-header"><div class="chat-dot"></div><span class="chat-header-label">Live conversation</span></div>
+        <div class="chat-body">
+          <div class="bubble parent">
+            <div class="bubble-label">You</div>
+            He's in bed but keeps calling my name.
+          </div>
+          <div class="bubble ai">
+            <div class="bubble-label">SleepCoach</div>
+            Don't respond. He's learning that calling brings you. Wait 5 minutes. Then go briefly — no conversation, no cuddle. Say: <em>"Sleep tight."</em> And leave straight away.
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-card reveal" style="transition-delay:0.24s">
+        <div class="chat-header"><div class="chat-dot"></div><span class="chat-header-label">Live conversation</span></div>
+        <div class="chat-body">
+          <div class="bubble parent">
+            <div class="bubble-label">You</div>
+            She's getting angry and throwing her stuffed animal out of bed.
+          </div>
+          <div class="bubble ai">
+            <div class="bubble-label">SleepCoach</div>
+            Don't go in. This is a test — the calmer you stay, the faster it stops. Leave the toy on the floor. This usually lasts 10–15 minutes and gets shorter every night.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<section class="section features">
+  <div class="section-inner">
+    <span class="section-label" style="display:block;text-align:center;">✦ What you get</span>
+    <h2>Everything you need,<br/>nothing you don't</h2>
+    <div class="features-grid">
+      <div class="feature-card large reveal">
+        <div>
+          <span class="feature-icon">🤖</span>
+          <h3>Personal AI sleep coach</h3>
+          <p>No generic tips from the internet. SleepCoach asks questions about your child and gives tailored advice. Available day and night, as often as you need.</p>
+        </div>
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:28px;">
+          <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px;font-style:italic;">Example conversation</div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="background:rgba(79,47,159,0.3);border-radius:12px 12px 12px 4px;padding:12px 16px;font-size:13px;max-width:85%;">How old is your child and how long has this sleep problem been going on?</div>
+            <div style="background:rgba(255,255,255,0.07);border-radius:12px 12px 4px 12px;padding:12px 16px;font-size:13px;max-width:85%;margin-left:auto;text-align:right;">5 years old, about 6 months now.</div>
+            <div style="background:rgba(79,47,159,0.3);border-radius:12px 12px 12px 4px;padding:12px 16px;font-size:13px;max-width:85%;">Understood. Here's a concrete 2-week plan just for you... 🌙</div>
+          </div>
+        </div>
+      </div>
+      <div class="feature-card reveal">
+        <span class="feature-icon">🎯</span>
+        <h3>Proven methods</h3>
+        <p>Based on sleep science: fading, positive reinforcement, bedtime rituals. Safe and child-friendly.</p>
+      </div>
+      <div class="feature-card reveal" style="transition-delay:0.1s">
+        <span class="feature-icon">🌍</span>
+        <h3>Available in your language</h3>
+        <p>English and Dutch supported. No translation needed. The coach understands your family's context and sleep habits.</p>
+      </div>
+      <div class="feature-card reveal" style="transition-delay:0.2s">
+        <span class="feature-icon">📱</span>
+        <h3>Always within reach</h3>
+        <p>Works on your phone, tablet and computer. Open the app whenever you need it — including in the middle of the night.</p>
+      </div>
+      <div class="feature-card reveal" style="transition-delay:0.3s">
+        <span class="feature-icon">💰</span>
+        <h3>A fraction of the cost</h3>
+        <p>A professional sleep coach costs €300–€500. SleepCoach gives you the same results for a few euros.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section testimonials">
+  <div class="section-inner">
+    <span class="section-label">✦ What parents say</span>
+    <h2>Real families, real results</h2>
+    <div class="testi-grid">
+      <div class="testi reveal">
+        <div class="stars-row">★★★★★</div>
+        <p class="testi-text">"After 3 weeks our 4-year-old fell asleep on her own for the first time. The sleep plan was concrete and easy to follow."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">👩</div>
+          <div><div class="testi-name">Lisa van der Berg</div><div class="testi-role">Mother of Emma (4)</div></div>
+        </div>
+      </div>
+      <div class="testi reveal" style="transition-delay:0.15s">
+        <div class="stars-row">★★★★★</div>
+        <p class="testi-text">"I was sceptical about AI advice, but this really works. The coach asked exactly the right questions and gave advice that fit our family."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">👨</div>
+          <div><div class="testi-name">Mark Janssen</div><div class="testi-role">Father of Tim (6) and Sara (8)</div></div>
+        </div>
+      </div>
+      <div class="testi reveal" style="transition-delay:0.3s">
+        <div class="stars-row">★★★★★</div>
+        <p class="testi-text">"We're finally sleeping through the night again. We'd tried everything — this was the first approach that actually worked for us."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">👩</div>
+          <div><div class="testi-name">Sophie de Vries</div><div class="testi-role">Mother of Lotte (5)</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section pricing" id="pricing">
+  <div class="section-inner">
+    <span class="section-label">✦ Investment</span>
+    <h2>One price. Lifetime access.</h2>
+    <p class="pricing-sub">No subscription. No surprises. Just peace at home.</p>
+    <div class="price-card reveal">
+      <div class="price-badge">Full access</div>
+      <div class="price-amount"><sup>€</sup>25</div>
+      <p class="price-once">one-time — lifetime access</p>
+      <ul class="price-features">
+        <li><span class="check">✦</span> Unlimited chat with your sleep coach</li>
+        <li><span class="check">✦</span> Personalised sleep plan</li>
+        <li><span class="check">✦</span> Proven methods for ages 3–8</li>
+        <li><span class="check">✦</span> Available 24/7, including at night</li>
+        <li><span class="check">✦</span> Updates and new features included</li>
+        <li><span class="check">✦</span> 30-day money-back guarantee</li>
+      </ul>
+      <a href="app.html" class="btn-primary-large" style="display:block;text-align:center;text-decoration:none;">Start sleeping better tonight →</a>
+      <p class="price-note">100% secure payment · No subscription · Cancel never needed</p>
+    </div>
+  </div>
+</section>
+
+<div class="cta-banner reveal">
+  <h2>Your child can learn this.<br/>We'll help you both.</h2>
+  <p>Join over 1,200 parents who are already sleeping soundly.</p>
+  <a href="app.html" class="btn-primary">Start today for €25 →</a>
+</div>
+
+<footer>
+  <div class="logo">Sleep<span>Coach</span> AI</div>
+  <div>© 2025 SleepCoach · <a href="#" style="color:inherit;opacity:0.6;">Privacy</a> · <a href="#" style="color:inherit;opacity:0.6;">Terms</a></div>
+  <div style="color:var(--muted)">Made with ♥ for exhausted parents</div>
+</footer>
+
+<script>
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 80; i++) {
+    const s = document.createElement('div');
+    s.classList.add('star');
+    const size = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;top:${Math.random()*100}%;--d:${(Math.random()*3+2).toFixed(1)}s;--delay:-${(Math.random()*5).toFixed(1)}s;opacity:${Math.random()*0.5+0.05};`;
+    starsEl.appendChild(s);
+  }
+
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
