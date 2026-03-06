@@ -48,7 +48,7 @@
     .lang-toggle {
       position: fixed; top: 18px; right: 18px; z-index: 200;
       display: flex; background: rgba(255,255,255,0.06);
-      border: 1px solid var(--border); border-radius: 20px; overflow: hidden;
+      border: 1px solid var(--border); border-radius: 20px; overflow-y: auto;
     }
     .lang-btn {
       padding: 6px 14px; font-size: 11px; font-family: var(--sans);
@@ -97,7 +97,7 @@
     .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
     .option-card {
       background: var(--surface); border: 1.5px solid var(--border);
-      border-radius: 16px; padding: 16px 20px;
+      border-radius: 16px; padding: 12px 16px;
       cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 14px;
     }
     .option-card:hover { background: rgba(124,58,237,0.15); border-color: rgba(124,58,237,0.4); }
@@ -349,7 +349,7 @@
 <!-- ── SCREEN: INTAKE ── -->
 <div class="screen" id="screen-intake">
   <div style="padding-top: 60px; padding-bottom: 60px;">
-    <button class="btn-back" onclick="showScreen('home')" id="btn-back-intake">← <span id="txt-back">Terug</span></button>
+    <button class="btn-back" onclick="prevStep()" id="btn-back-intake">← <span id="txt-back">Terug</span></button>
     <div id="intake-content"></div>
   </div>
 </div>
@@ -721,6 +721,15 @@ function selectOption(id, value, card) {
   document.getElementById('next-btn').disabled = false;
 }
 
+function prevStep() {
+  if (currentStep > 0) {
+    currentStep--;
+    renderIntakeStep();
+  } else {
+    showScreen('home');
+  }
+}
+
 function nextStep() {
   const t = T[lang];
   if (currentStep < t.intake.length - 1) {
@@ -748,8 +757,12 @@ async function generateProgram() {
     });
     const data = await res.json();
     const raw = data.content?.[0]?.text || '';
+    // Strip markdown code fences and find the JSON object
     const clean = raw.replace(/```json|```/g, '').trim();
-    programData = JSON.parse(clean);
+    const jsonStart = clean.indexOf('{');
+    const jsonEnd = clean.lastIndexOf('}');
+    const jsonStr = clean.substring(jsonStart, jsonEnd + 1);
+    programData = JSON.parse(jsonStr);
     currentDay = 0;
     renderResult();
     showScreen('result');
