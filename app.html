@@ -852,19 +852,13 @@ async function generateProgram() {
     const jsonEnd = clean.lastIndexOf('}');
     if (jsonStart === -1) throw new Error('Geen JSON');
     let jsonStr = clean.substring(jsonStart, jsonEnd + 1);
-    // Robust JSON cleaning
-    jsonStr = jsonStr
-      .replace(/[\u0000-\u001F\u007F]/g, ' ')  // control chars
-      .replace(/\u2019/g, '')                      // right single quote
-      .replace(/\u2018/g, '')                      // left single quote  
-      .replace(/([^\\\\])\'([^,\}\]:\n])/g, '$1$2')  // apostrophe mid-word
-      .replace(/\'s /g, 's ')                      // 's nachts -> s nachts
-      .replace(/\'t /g, 't ')                      // 't kind -> t kind
-      .replace(/([a-zA-Z])\'([a-zA-Z])/g, '$1$2'); // any word'word
+    jsonStr = jsonStr.replace(/[\u0000-\u001F\u007F]/g, ' ');
+    jsonStr = jsonStr.replace(/\u2019/g, '').replace(/\u2018/g, '');
+    jsonStr = jsonStr.replace(/'s /g, 's ').replace(/'t /g, 't ');
+    jsonStr = jsonStr.replace(/([a-zA-Z])'([a-zA-Z])/g, '$1$2');
     try {
       programData = JSON.parse(jsonStr);
     } catch(e1) {
-      // Last resort: remove ALL single quotes from string values
       jsonStr = jsonStr.replace(/'/g, '');
       try {
         programData = JSON.parse(jsonStr);
