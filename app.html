@@ -20,17 +20,18 @@
       --serif: 'Cormorant Garamond', serif;
     }
 
-    html, body { height: 100%; }
-
+    html, body { margin: 0; padding: 0; }
     body {
       background: linear-gradient(160deg, #07050f 0%, #130d2a 50%, #0d1535 100%);
+      background-attachment: fixed;
       color: white;
       font-family: var(--sans);
       min-height: 100vh;
+      min-height: 100dvh;
       overflow-x: hidden;
     }
 
-    #stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+    #stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; background: linear-gradient(160deg, #07050f 0%, #130d2a 50%, #0d1535 100%); }
     .star { position: absolute; border-radius: 50%; background: white; }
 
     @keyframes twinkle   { 0%,100%{opacity:.06} 50%{opacity:.6} }
@@ -131,7 +132,11 @@
     .btn-back:hover { color: white; }
 
     /* ── HOME SCREEN ── */
-    #screen-home { padding-top: 72px; padding-bottom: 48px; text-align: center; }
+    #screen-home { 
+      padding-top: 72px; padding-bottom: 48px; text-align: center;
+      min-height: 100vh; min-height: 100dvh;
+      box-sizing: border-box;
+    }
     .home-moon {
       width: 80px; height: 80px; border-radius: 50%;
       background: radial-gradient(circle at 36% 36%, #fff9e6, #ffd97d 60%, #f4a020);
