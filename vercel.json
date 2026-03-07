@@ -1,3 +1,4 @@
+```json
 {
   "rewrites": [
     { "source": "/app", "destination": "/app.html" }
@@ -8,3 +9,4 @@
     }
   }
 }
+```
