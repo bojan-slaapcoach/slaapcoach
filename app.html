@@ -832,9 +832,16 @@ async function generateProgram() {
     const jsonEnd = clean.lastIndexOf('}');
     if (jsonStart === -1) throw new Error('Geen JSON');
     let jsonStr = clean.substring(jsonStart, jsonEnd + 1);
-    // Fix broken JSON: replace unescaped single quotes and control chars
+    // Fix 1: control characters
     jsonStr = jsonStr.replace(/[\u0000-\u001F\u007F]/g, ' ');
-    programData = JSON.parse(jsonStr);
+    // Fix 2: remove apostrophes that break JSON (e.g. 's nachts -> s nachts)
+    // We do a safe replace: only within JSON string values
+    jsonStr = jsonStr.replace(/([^\\])'/g, "$1");
+    try {
+      programData = JSON.parse(jsonStr);
+    } catch(e) {
+      throw new Error('Parse fout: ' + e.message.substring(0, 100));
+    }
     if (!programData.program || !Array.isArray(programData.program)) throw new Error('Ongeldig formaat');
     currentDay = 0;
     renderResult();
