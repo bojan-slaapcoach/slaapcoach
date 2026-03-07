@@ -431,7 +431,17 @@ const T = {
 
     intake: [
       {
-        id: 'age', step: 'Stap 1 van 4',
+        id: 'names', step: 'Stap 1 van 5',
+        title: 'Welkom! Hoe heten jullie?',
+        sub: 'We maken het programma persoonlijk voor jou en je kind.',
+        type: 'text',
+        fields: [
+          { id: 'parentName', label: 'Jouw naam', placeholder: 'bijv. Lisa' },
+          { id: 'childName', label: 'Naam van je kind', placeholder: 'bijv. Emma' },
+        ]
+      },
+      {
+        id: 'age', step: 'Stap 2 van 5',
         title: 'Hoe oud is je kind?',
         sub: 'De leeftijd bepaalt welke aanpak het beste werkt.',
         options: [
@@ -534,7 +544,17 @@ Beantwoord vragen over het programma. Wees concreet, praktisch en bemoedigend. M
 
     intake: [
       {
-        id: 'age', step: 'Step 1 of 4',
+        id: 'names', step: 'Step 1 of 5',
+        title: 'Welcome! What are your names?',
+        sub: "We make this program personal for you and your child.",
+        type: 'text',
+        fields: [
+          { id: 'parentName', label: 'Your name', placeholder: 'e.g. Sarah' },
+          { id: 'childName', label: 'Your child name', placeholder: 'e.g. Emma' },
+        ]
+      },
+      {
+        id: 'age', step: 'Step 2 of 5',
         title: 'How old is your child?',
         sub: "Your child's age determines which approach works best.",
         options: [
@@ -832,15 +852,25 @@ async function generateProgram() {
     const jsonEnd = clean.lastIndexOf('}');
     if (jsonStart === -1) throw new Error('Geen JSON');
     let jsonStr = clean.substring(jsonStart, jsonEnd + 1);
-    // Fix 1: control characters
-    jsonStr = jsonStr.replace(/[\u0000-\u001F\u007F]/g, ' ');
-    // Fix 2: remove apostrophes that break JSON (e.g. 's nachts -> s nachts)
-    // We do a safe replace: only within JSON string values
-    jsonStr = jsonStr.replace(/([^\\])'/g, "$1");
+    // Robust JSON cleaning
+    jsonStr = jsonStr
+      .replace(/[\u0000-\u001F\u007F]/g, ' ')  // control chars
+      .replace(/\u2019/g, '')                      // right single quote
+      .replace(/\u2018/g, '')                      // left single quote  
+      .replace(/([^\\\\])\'([^,\}\]:\n])/g, '$1$2')  // apostrophe mid-word
+      .replace(/\'s /g, 's ')                      // 's nachts -> s nachts
+      .replace(/\'t /g, 't ')                      // 't kind -> t kind
+      .replace(/([a-zA-Z])\'([a-zA-Z])/g, '$1$2'); // any word'word
     try {
       programData = JSON.parse(jsonStr);
-    } catch(e) {
-      throw new Error('Parse fout: ' + e.message.substring(0, 100));
+    } catch(e1) {
+      // Last resort: remove ALL single quotes from string values
+      jsonStr = jsonStr.replace(/'/g, '');
+      try {
+        programData = JSON.parse(jsonStr);
+      } catch(e2) {
+        throw new Error('Parse fout: ' + e2.message.substring(0, 100));
+      }
     }
     if (!programData.program || !Array.isArray(programData.program)) throw new Error('Ongeldig formaat');
     currentDay = 0;
