@@ -518,9 +518,9 @@ Schrijfstijl voor alle instructies:
 - Schrijf alsof je naast de ouder staat en het voordoet.
 
 Voorbeeld van goede stijl:
-Ga naar binnen. Trek de deken recht. Zeg: "Zo. Het is nacht." Ga meteen weer weg. Niet blijven staan.
+Ga naar binnen. Trek de deken recht. Zeg tegen je kind: Zo. Het is nacht. Ga meteen weer weg. Niet blijven staan.
 
-Kies de methode op basis van de intake antwoorden. BELANGRIJK: Gebruik GEEN apostrofs of aanhalingstekens binnen JSON string waarden — schrijf bijvoorbeeld 's ochtends als s ochtends.`,
+Kies de methode op basis van de intake antwoorden. BELANGRIJK: gebruik NOOIT aanhalingstekens binnen JSON string waarden. BELANGRIJK: Gebruik GEEN apostrofs of aanhalingstekens binnen JSON string waarden — schrijf bijvoorbeeld 's ochtends als s ochtends.`,
 
     chatSystem: (answers, method) => `Je bent SlaapCoach AI, een warme AI-slaapcoach. De ouder heeft een persoonlijk slaapprogramma ontvangen met de ${method} methode, gebaseerd op hun kind (${answers.age} jaar) met het probleem "${answers.problem}".
 
@@ -634,9 +634,9 @@ Writing style for all instructions:
 - Write as if you are standing next to the parent showing them what to do.
 
 Example of good style:
-Go in. Straighten the blanket. Say: "There. It is night." Leave immediately. Do not stay.
+Go in. Straighten the blanket. Tell your child: There. It is night. Leave immediately. Do not stay.
 
-Choose the method based on the intake answers. IMPORTANT: Do NOT use apostrophes inside JSON string values.`,
+Choose the method based on the intake answers. IMPORTANT: Do NOT use any quotes (single or double) inside JSON string values.`,
 
     chatSystem: (answers, method) => `You are SlaapCoach AI, a warm AI sleep coach. The parent has received a personal sleep program using the ${method} method, based on their child (${answers.age} years) with the problem "${answers.problem}".
 
@@ -858,12 +858,24 @@ async function generateProgram() {
     if (jsonStart === -1) throw new Error('Geen JSON');
     let jsonStr = clean.substring(jsonStart, jsonEnd + 1);
     jsonStr = jsonStr.replace(/[\u0000-\u001F\u007F]/g, ' ');
-    jsonStr = jsonStr.replace(/\u2019/g, '').replace(/\u2018/g, '');
+    jsonStr = jsonStr.replace(/\u2019/g, '').replace(/\u2018/g, '').replace(/\u201C/g, '').replace(/\u201D/g, '');
     jsonStr = jsonStr.replace(/'s /g, 's ').replace(/'t /g, 't ');
     jsonStr = jsonStr.replace(/([a-zA-Z])'([a-zA-Z])/g, '$1$2');
+    // Fix unescaped double quotes inside JSON string values
+    // These appear when AI writes: "Zeg: "Zo. Het is nacht.""
+    jsonStr = jsonStr.replace(/"([^"\\\n]*(?:\\.[^"\\\n]*)*)"(?=[^:,\}\]\n]*[^\\]")/g, function(m, inner) {
+      return '"' + inner.replace(/"/g, '\\"') + '"';
+    });
     try {
       programData = JSON.parse(jsonStr);
     } catch(e1) {
+      // Last resort: remove all quotes from field values
+      jsonStr = jsonStr.replace(/'/g, '').replace(/\\"/g, '').replace(/"([a-z_]+)":\s*"([^"]*)"/g, function(m, k, v) {
+        return '"' + k + '": "' + v.replace(/"/g,'') + '"';
+      });
+      try {
+        programData = JSON.parse(jsonStr);
+      } catch(e2) {
       jsonStr = jsonStr.replace(/'/g, '');
       try {
         programData = JSON.parse(jsonStr);
