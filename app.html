@@ -787,25 +787,19 @@ async function generateProgram() {
     if (jsonStart === -1) throw new Error('Geen JSON');
     let jsonStr = clean.substring(jsonStart, jsonEnd + 1);
     // Stap 1: verwijder control characters en enkele aanhalingstekens
-    jsonStr = jsonStr.replace(/[\u0000-\u001F\u007F]/g, ' ').replace(/'/g, '');
-    // Stap 2: fix dubbele aanhalingstekens binnen JSON string values
-    // Vervang "key": "waarde met "aanhalingstekens" erin" → "key": "waarde met aanhalingstekens erin"
-    jsonStr = jsonStr.replace(/"([^"\\\n]{0,200})"/g, function(match, inner, offset, str) {
-      // Check of dit een JSON key is (gevolgd door :) of een string value
-      const before = str.substring(Math.max(0, offset-3), offset);
-      if (before.trim().endsWith(':') || before.trim().endsWith('{') || before.trim().endsWith('[') || before.trim().endsWith(',')) {
-        return match; // laat JSON structuur ongemoeid
-      }
-      // Verwijder dubbele aanhalingstekens uit de inhoud
-      return '"' + inner.replace(/"/g, '') + '"';
-    });
+    // Verwijder alle problematische karakters
+    jsonStr = jsonStr.replace(/[\u0000-\u001F\u007F]/g, ' ');
+    // Verwijder aanhalingstekens die JSON strings breken
+    // Fix het patroon: "tekst." gevolgd door newline en } 
+    jsonStr = jsonStr.replace(/([^\\])"(\s*\n\s*[},\]])/g, '$1$2');
+    jsonStr = jsonStr.replace(/([^\\])"(\s*[},\]])/g, '$1$2');
+    // Verwijder enkelvoudige aanhalingstekens
+    jsonStr = jsonStr.replace(/'/g, '');
     try {
       programData = JSON.parse(jsonStr);
     } catch(e1) {
-      // Nuclear optie: verwijder alle dubbele aanhalingstekens behalve JSON structuur
-      jsonStr = jsonStr.replace(/": "(.*?)(?=",\s*"|"\s*[}\]])/gs, function(m) {
-        return m.replace(/(?<=": ")(.*?)(?="[,}\]])/gs, inner => inner.replace(/"/g, ''));
-      });
+      // Last resort: verwijder ALLE aanhalingstekens die niet JSON structuur zijn
+      jsonStr = jsonStr.replace(/"(?=[^:,{}\[\]\n]*[^\\]"\s*[},\]])/g, '');
       try {
         programData = JSON.parse(jsonStr);
       } catch(e2) {
