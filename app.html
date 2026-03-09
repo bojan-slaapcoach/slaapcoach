@@ -857,33 +857,13 @@ async function generateProgram() {
     const jsonEnd = clean.lastIndexOf('}');
     if (jsonStart === -1) throw new Error('Geen JSON');
     let jsonStr = clean.substring(jsonStart, jsonEnd + 1);
-    jsonStr = jsonStr.replace(/[\u0000-\u001F\u007F]/g, ' ');
-    jsonStr = jsonStr.replace(/\u2019/g, '').replace(/\u2018/g, '').replace(/\u201C/g, '').replace(/\u201D/g, '');
-    jsonStr = jsonStr.replace(/'s /g, 's ').replace(/'t /g, 't ');
-    jsonStr = jsonStr.replace(/([a-zA-Z])'([a-zA-Z])/g, '$1$2');
-    // Fix unescaped double quotes inside JSON string values
-    // These appear when AI writes: "Zeg: "Zo. Het is nacht.""
-    jsonStr = jsonStr.replace(/"([^"\\\n]*(?:\\.[^"\\\n]*)*)"(?=[^:,\}\]\n]*[^\\]")/g, function(m, inner) {
-      return '"' + inner.replace(/"/g, '\\"') + '"';
-    });
+    jsonStr = jsonStr.replace(/[\u0000-\u001F\u007F]/g, ' ').replace(/'/g, '');
     try {
       programData = JSON.parse(jsonStr);
     } catch(e1) {
-      // Last resort: remove all quotes from field values
-      jsonStr = jsonStr.replace(/'/g, '').replace(/\\"/g, '').replace(/"([a-z_]+)":\s*"([^"]*)"/g, function(m, k, v) {
-        return '"' + k + '": "' + v.replace(/"/g,'') + '"';
-      });
-      try {
-        programData = JSON.parse(jsonStr);
-      } catch(e2) {
-      jsonStr = jsonStr.replace(/'/g, '');
-      try {
-        programData = JSON.parse(jsonStr);
-      } catch(e2) {
-        throw new Error('Parse fout: ' + e2.message.substring(0, 100));
-      }
+      throw new Error('Parse fout: ' + e1.message.substring(0, 100));
     }
-    if (!programData.program || !Array.isArray(programData.program)) throw new Error('Ongeldig formaat');
+        if (!programData.program || !Array.isArray(programData.program)) throw new Error('Ongeldig formaat');
     currentDay = 0;
     renderResult();
     showScreen('result');
