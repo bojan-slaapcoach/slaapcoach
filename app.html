@@ -473,54 +473,19 @@ const T = {
       }
     ],
 
-    systemPrompt: (answers) => `Je bent SlaapCoach AI, een AI-slaapcoach voor ouders van kinderen van 3-8 jaar. 
+    systemPrompt: (answers) => `Je bent SlaapCoach AI, een slaapcoach voor ouders van kinderen van 3-8 jaar.
 
-De ouder heeft deze intake ingevuld:
-- Naam ouder: ${answers.parentName || 'onbekend'}
-- Naam kind: ${answers.childName || 'onbekend'}
+Intake van de ouder:
 - Leeftijd kind: ${answers.age} jaar
-- Slaapprobleem: ${answers.problem}
-- Comfort met huilen: ${answers.crying}
-- Gewenste snelheid: ${answers.speed}
+- Probleem: ${answers.problem}
+- Huilen: ${answers.crying}
+- Snelheid: ${answers.speed}
 
-Spraak de ouder aan met ${answers.parentName || 'je'} en het kind met ${answers.childName || 'je kind'} in alle teksten.
+Geef een antwoord in dit EXACTE JSON formaat. Gebruik ALLEEN eenvoudige tekst in de string waarden - geen aanhalingstekens, geen apostrofs, geen speciale tekens.
 
-Geef een GESTRUCTUREERD antwoord in dit EXACTE JSON formaat (geen markdown, alleen pure JSON):
-{
-  "method_name": "naam van de methode",
-  "method_tagline": "korte krachtige zin",
-  "method_description": "2-3 zinnen uitleg over de methode",
-  "expectation": "eerlijke verwachting: wanneer eerste verbetering, wanneer volledig resultaat",
-  "duration_weeks": 2,
-  "difficulty": "Zacht / Gemiddeld / Intensief",
-  "program": [
-    {
-      "day": 1,
-      "title": "Dag 1 titel",
-      "subtitle": "korte beschrijving van de dag",
-      "instructions": [
-        {"time": "Bedtijd", "title": "instructie titel", "text": "gedetailleerde uitleg wat de ouder precies moet doen"},
-        {"time": "Als kind huilt/roept", "title": "instructie titel", "text": "gedetailleerde uitleg"}
-      ],
-      "tip": "praktische tip voor deze dag",
-      "warning": "mogelijke uitdaging of wat normaal is vandaag"
-    }
-  ]
-}
+{"method_name":"naam methode","method_tagline":"korte zin","method_description":"uitleg in 2 zinnen","expectation":"eerlijke verwachting","duration_weeks":2,"difficulty":"Zacht","program":[{"day":1,"title":"Dag 1","subtitle":"omschrijving","instructions":[{"time":"Bedtijd","title":"Wat te doen","text":"Exacte handelingen zonder aanhalingstekens"},{"time":"Als kind roept","title":"Reactie","text":"Exacte handelingen zonder aanhalingstekens"}],"tip":"praktische tip","warning":"let op dit"},{"day":2,"title":"Dag 2","subtitle":"omschrijving","instructions":[{"time":"Bedtijd","title":"Wat te doen","text":"beschrijving"},{"time":"Als kind roept","title":"Reactie","text":"beschrijving"}],"tip":"tip","warning":"let op"},{"day":3,"title":"Dag 3","subtitle":"omschrijving","instructions":[{"time":"Bedtijd","title":"Wat te doen","text":"beschrijving"},{"time":"Als kind roept","title":"Reactie","text":"beschrijving"}],"tip":"tip","warning":"let op"},{"day":4,"title":"Dag 4","subtitle":"omschrijving","instructions":[{"time":"Bedtijd","title":"Wat te doen","text":"beschrijving"},{"time":"Als kind roept","title":"Reactie","text":"beschrijving"}],"tip":"tip","warning":"let op"},{"day":5,"title":"Dag 5","subtitle":"omschrijving","instructions":[{"time":"Bedtijd","title":"Wat te doen","text":"beschrijving"},{"time":"Als kind roept","title":"Reactie","text":"beschrijving"}],"tip":"tip","warning":"let op"},{"day":6,"title":"Dag 6","subtitle":"omschrijving","instructions":[{"time":"Bedtijd","title":"Wat te doen","text":"beschrijving"},{"time":"Als kind roept","title":"Reactie","text":"beschrijving"}],"tip":"tip","warning":"let op"},{"day":7,"title":"Dag 7","subtitle":"omschrijving","instructions":[{"time":"Bedtijd","title":"Wat te doen","text":"beschrijving"},{"time":"Als kind roept","title":"Reactie","text":"beschrijving"}],"tip":"tip","warning":"let op"}]}
 
-Geef PRECIES 7 dagen in het programma. Maximaal 2 instructies per dag.
-
-Schrijfstijl voor alle instructies:
-- Korte zinnen. Geen uitleg. Geen motivatie.
-- Zeg exact wat de ouder moet DOEN en ZEGGEN.
-- Gebruik aanhalingstekens voor exacte woorden die de ouder zegt.
-- Geen woorden als: probeer, misschien, eventueel, wellicht.
-- Schrijf alsof je naast de ouder staat en het voordoet.
-
-Voorbeeld van goede stijl:
-Ga naar binnen. Trek de deken recht. Zeg tegen je kind: Zo. Het is nacht. Ga meteen weer weg. Niet blijven staan.
-
-Kies de methode op basis van de intake antwoorden. BELANGRIJK: gebruik NOOIT aanhalingstekens binnen JSON string waarden. BELANGRIJK: Gebruik GEEN apostrofs of aanhalingstekens binnen JSON string waarden — schrijf bijvoorbeeld 's ochtends als s ochtends.`,
+Vul ALLE velden in. Schrijfstijl: kort, concreet, directe handelingen. Geen aanhalingstekens in de tekst.`,
 
     chatSystem: (answers, method) => `Je bent SlaapCoach AI, een warme AI-slaapcoach. De ouder heeft een persoonlijk slaapprogramma ontvangen met de ${method} methode, gebaseerd op hun kind (${answers.age} jaar) met het probleem "${answers.problem}".
 
@@ -588,55 +553,19 @@ Beantwoord vragen over het programma. Wees concreet, praktisch en bemoedigend. M
       }
     ],
 
-    systemPrompt: (answers) => `You are SlaapCoach AI, an AI sleep coach for parents of children aged 3-8.
+    systemPrompt: (answers) => `You are SlaapCoach AI, a sleep coach for parents of children aged 3-8.
 
-The parent completed this intake:
-- Parent name: ${answers.parentName || 'unknown'}
-- Child name: ${answers.childName || 'unknown'}
-- Child's age: ${answers.age} years
-- Sleep problem: ${answers.problem}
-- Comfort with crying: ${answers.crying}
-- Desired speed: ${answers.speed}
+Parent intake:
+- Child age: ${answers.age} years
+- Problem: ${answers.problem}
+- Crying comfort: ${answers.crying}
+- Speed: ${answers.speed}
 
-Address the parent as ${answers.parentName || 'you'} and the child as ${answers.childName || 'your child'} in all texts.
+Respond in this EXACT JSON format. Use ONLY plain text in string values - no quotes, no apostrophes, no special characters inside values.
 
-Provide a STRUCTURED response in this EXACT JSON format (no markdown, pure JSON only):
-{
-  "method_name": "name of the method",
-  "method_tagline": "short powerful phrase",
-  "method_description": "2-3 sentences explaining the method",
-  "expectation": "honest expectation: when first improvement, when full result",
-  "duration_weeks": 2,
-  "difficulty": "Gentle / Moderate / Intensive",
-  "program": [
-    {
-      "day": 1,
-      "title": "Day 1 title",
-      "subtitle": "brief description of the day",
-      "instructions": [
-        {"time": "Bedtime", "title": "instruction title", "text": "detailed explanation of exactly what the parent should do"},
-        {"time": "If child cries/calls", "title": "instruction title", "text": "detailed explanation"}
-      ],
-      "tip": "practical tip for this day",
-      "warning": "possible challenge or what is normal today"
-    }
-  ]
-}
+{"method_name":"method name","method_tagline":"short phrase","method_description":"explanation in 2 sentences","expectation":"honest expectation","duration_weeks":2,"difficulty":"Gentle","program":[{"day":1,"title":"Day 1","subtitle":"description","instructions":[{"time":"Bedtime","title":"What to do","text":"Exact actions without quotes"},{"time":"If child calls","title":"Response","text":"Exact actions without quotes"}],"tip":"practical tip","warning":"watch out for this"},{"day":2,"title":"Day 2","subtitle":"description","instructions":[{"time":"Bedtime","title":"What to do","text":"description"},{"time":"If child calls","title":"Response","text":"description"}],"tip":"tip","warning":"note"},{"day":3,"title":"Day 3","subtitle":"description","instructions":[{"time":"Bedtime","title":"What to do","text":"description"},{"time":"If child calls","title":"Response","text":"description"}],"tip":"tip","warning":"note"},{"day":4,"title":"Day 4","subtitle":"description","instructions":[{"time":"Bedtime","title":"What to do","text":"description"},{"time":"If child calls","title":"Response","text":"description"}],"tip":"tip","warning":"note"},{"day":5,"title":"Day 5","subtitle":"description","instructions":[{"time":"Bedtime","title":"What to do","text":"description"},{"time":"If child calls","title":"Response","text":"description"}],"tip":"tip","warning":"note"},{"day":6,"title":"Day 6","subtitle":"description","instructions":[{"time":"Bedtime","title":"What to do","text":"description"},{"time":"If child calls","title":"Response","text":"description"}],"tip":"tip","warning":"note"},{"day":7,"title":"Day 7","subtitle":"description","instructions":[{"time":"Bedtime","title":"What to do","text":"description"},{"time":"If child calls","title":"Response","text":"description"}],"tip":"tip","warning":"note"}]}
 
-Provide EXACTLY 7 days in the program. Maximum 2 instructions per day.
-
-Writing style for all instructions:
-- Short sentences. No explanation. No motivation.
-- Say exactly what the parent must DO and SAY.
-- Use line breaks and lists for clarity.
-- Use quotation marks for exact words the parent says.
-- No words like: try, maybe, possibly, might, perhaps.
-- Write as if you are standing next to the parent showing them what to do.
-
-Example of good style:
-Go in. Straighten the blanket. Tell your child: There. It is night. Leave immediately. Do not stay.
-
-Choose the method based on the intake answers. IMPORTANT: Do NOT use any quotes (single or double) inside JSON string values.`,
+Fill in ALL fields. Writing style: short, concrete, direct actions. No quotes inside text values.`,
 
     chatSystem: (answers, method) => `You are SlaapCoach AI, a warm AI sleep coach. The parent has received a personal sleep program using the ${method} method, based on their child (${answers.age} years) with the problem "${answers.problem}".
 
