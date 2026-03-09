@@ -857,11 +857,31 @@ async function generateProgram() {
     const jsonEnd = clean.lastIndexOf('}');
     if (jsonStart === -1) throw new Error('Geen JSON');
     let jsonStr = clean.substring(jsonStart, jsonEnd + 1);
+    // Stap 1: verwijder control characters en enkele aanhalingstekens
     jsonStr = jsonStr.replace(/[\u0000-\u001F\u007F]/g, ' ').replace(/'/g, '');
+    // Stap 2: fix dubbele aanhalingstekens binnen JSON string values
+    // Vervang "key": "waarde met "aanhalingstekens" erin" → "key": "waarde met aanhalingstekens erin"
+    jsonStr = jsonStr.replace(/"([^"\\\n]{0,200})"/g, function(match, inner, offset, str) {
+      // Check of dit een JSON key is (gevolgd door :) of een string value
+      const before = str.substring(Math.max(0, offset-3), offset);
+      if (before.trim().endsWith(':') || before.trim().endsWith('{') || before.trim().endsWith('[') || before.trim().endsWith(',')) {
+        return match; // laat JSON structuur ongemoeid
+      }
+      // Verwijder dubbele aanhalingstekens uit de inhoud
+      return '"' + inner.replace(/"/g, '') + '"';
+    });
     try {
       programData = JSON.parse(jsonStr);
     } catch(e1) {
-      throw new Error('Parse fout: ' + e1.message.substring(0, 100));
+      // Nuclear optie: verwijder alle dubbele aanhalingstekens behalve JSON structuur
+      jsonStr = jsonStr.replace(/": "(.*?)(?=",\s*"|"\s*[}\]])/gs, function(m) {
+        return m.replace(/(?<=": ")(.*?)(?="[,}\]])/gs, inner => inner.replace(/"/g, ''));
+      });
+      try {
+        programData = JSON.parse(jsonStr);
+      } catch(e2) {
+        throw new Error('Parse fout: ' + e2.message.substring(0, 100));
+      }
     }
         if (!programData.program || !Array.isArray(programData.program)) throw new Error('Ongeldig formaat');
     currentDay = 0;
