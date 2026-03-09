@@ -508,7 +508,19 @@ Geef een GESTRUCTUREERD antwoord in dit EXACTE JSON formaat (geen markdown, alle
   ]
 }
 
-Geef PRECIES 7 dagen in het programma. Maximaal 2 instructies per dag. Houd elke instructie kort: max 2 zinnen. Geef concrete handelingen. Kies de methode op basis van de intake antwoorden. BELANGRIJK: Gebruik GEEN apostrofs of aanhalingstekens binnen JSON string waarden — schrijf bijvoorbeeld 's ochtends als s ochtends.`,
+Geef PRECIES 7 dagen in het programma. Maximaal 2 instructies per dag.
+
+Schrijfstijl voor alle instructies:
+- Korte zinnen. Geen uitleg. Geen motivatie.
+- Zeg exact wat de ouder moet DOEN en ZEGGEN.
+- Gebruik aanhalingstekens voor exacte woorden die de ouder zegt.
+- Geen woorden als: probeer, misschien, eventueel, wellicht.
+- Schrijf alsof je naast de ouder staat en het voordoet.
+
+Voorbeeld van goede stijl:
+Ga naar binnen. Trek de deken recht. Zeg: "Zo. Het is nacht." Ga meteen weer weg. Niet blijven staan.
+
+Kies de methode op basis van de intake antwoorden. BELANGRIJK: Gebruik GEEN apostrofs of aanhalingstekens binnen JSON string waarden — schrijf bijvoorbeeld 's ochtends als s ochtends.`,
 
     chatSystem: (answers, method) => `Je bent SlaapCoach AI, een warme AI-slaapcoach. De ouder heeft een persoonlijk slaapprogramma ontvangen met de ${method} methode, gebaseerd op hun kind (${answers.age} jaar) met het probleem "${answers.problem}".
 
@@ -611,7 +623,20 @@ Provide a STRUCTURED response in this EXACT JSON format (no markdown, pure JSON 
   ]
 }
 
-Provide EXACTLY 7 days in the program. Maximum 2 instructions per day. Keep each instruction brief: max 2 sentences. Give concrete actions. Choose the method based on the intake answers. IMPORTANT: Do NOT use apostrophes or quotes inside JSON string values.`,
+Provide EXACTLY 7 days in the program. Maximum 2 instructions per day.
+
+Writing style for all instructions:
+- Short sentences. No explanation. No motivation.
+- Say exactly what the parent must DO and SAY.
+- Use line breaks and lists for clarity.
+- Use quotation marks for exact words the parent says.
+- No words like: try, maybe, possibly, might, perhaps.
+- Write as if you are standing next to the parent showing them what to do.
+
+Example of good style:
+Go in. Straighten the blanket. Say: "There. It is night." Leave immediately. Do not stay.
+
+Choose the method based on the intake answers. IMPORTANT: Do NOT use apostrophes inside JSON string values.`,
 
     chatSystem: (answers, method) => `You are SlaapCoach AI, a warm AI sleep coach. The parent has received a personal sleep program using the ${method} method, based on their child (${answers.age} years) with the problem "${answers.problem}".
 
