@@ -782,74 +782,63 @@ async function generateProgram() {
     const data = await res.json();
     const raw = data.content?.[0]?.text || '';
 
-    // Extraheer JSON velden direct via regex - omzeilt alle parse problemen
-    const extract = (key) => {
-      const m = raw.match(new RegExp('"' + key + '"\s*:\s*"((?:[^"\\]|\\.)*)"'));
-      return m ? m[1].replace(/\\n/g,' ').trim() : '';
+    const getField = (text, key) => {
+      const m = text.match(new RegExp('"' + key + '"\\s*:\\s*"((?:[^"\\\\]|\\\\.){0,500})"'));
+      return m ? m[1].replace(/\\n/g,' ').replace(/"/g,'').trim() : '';
     };
-    const extractNum = (key) => {
-      const m = raw.match(new RegExp('"' + key + '"\s*:\s*(\d+)'));
+    const getNum = (text, key) => {
+      const m = text.match(new RegExp('"' + key + '"\\s*:\\s*(\\d+)'));
       return m ? parseInt(m[1]) : 2;
     };
 
-    // Bouw programma handmatig op uit de raw response
     const days = [];
     const dayMatches = [...raw.matchAll(/"day"\s*:\s*(\d+)/g)];
-    
+
     for (let i = 0; i < dayMatches.length && i < 7; i++) {
-      const dayStart = dayMatches[i].index;
-      const dayEnd = dayMatches[i+1] ? dayMatches[i+1].index : raw.length;
-      const dayChunk = raw.substring(dayStart, dayEnd);
-      
-      const getField = (key) => {
-        const m = dayChunk.match(new RegExp('"' + key + '"\s*:\s*"((?:[^"\\]|\\.){0,300})"'));
-        return m ? m[1].replace(/"/g,'').replace(/\n/g,' ').trim() : '';
-      };
+      const start = dayMatches[i].index;
+      const end = i + 1 < dayMatches.length ? dayMatches[i+1].index : raw.length;
+      const chunk = raw.substring(start, end);
 
-      const instructions = [];
-      const instrMatches = [...dayChunk.matchAll(/"time"\s*:\s*"([^"]*)"/g)];
-      for (const im of instrMatches) {
-        const instrStart = im.index;
-        const instrChunk = dayChunk.substring(instrStart, instrStart + 400);
-        const timeVal = im[1];
+      const instrs = [];
+      const timeMatches = [...chunk.matchAll(/"time"\s*:\s*"([^"]*)"/g)];
+      timeMatches.forEach(tm => {
+        const pos = tm.index;
+        const instrChunk = chunk.substring(pos, pos + 500);
         const titleM = instrChunk.match(/"title"\s*:\s*"([^"]*)"/);
-        const textM = instrChunk.match(/"text"\s*:\s*"((?:[^"\\]|\\.)*)"/);
-        instructions.push({
-          time: timeVal,
+        const textM = instrChunk.match(/"text"\s*:\s*"((?:[^"\\\\]|\\\\.){0,300})"/);
+        instrs.push({
+          time: tm[1],
           title: titleM ? titleM[1] : '',
-          text: textM ? textM[1].replace(/"/g,'').replace(/\n/g,' ') : ''
+          text: textM ? textM[1].replace(/"/g,'').replace(/\\n/g,' ') : ''
         });
-      }
-
-      const tipM = dayChunk.match(/"tip"\s*:\s*"((?:[^"\\]|\\.)*)"/);
-      const warnM = dayChunk.match(/"warning"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+      });
 
       days.push({
         day: i + 1,
-        title: getField('title') || (lang === 'nl' ? 'Dag ' + (i+1) : 'Day ' + (i+1)),
-        subtitle: getField('subtitle') || '',
-        instructions: instructions.length > 0 ? instructions : [{time: 'Bedtijd', title: 'Instructie', text: getField('text') || ''}],
-        tip: tipM ? tipM[1].replace(/"/g,'') : '',
-        warning: warnM ? warnM[1].replace(/"/g,'') : ''
+        title: getField(chunk, 'title') || (lang === 'nl' ? 'Dag ' + (i+1) : 'Day ' + (i+1)),
+        subtitle: getField(chunk, 'subtitle') || '',
+        instructions: instrs.length > 0 ? instrs : [{time: 'Bedtijd', title: 'Instructie', text: ''}],
+        tip: getField(chunk, 'tip') || '',
+        warning: getField(chunk, 'warning') || ''
       });
     }
 
-    if (days.length === 0) throw new Error('Geen programma gevonden in response');
+    if (days.length === 0) throw new Error('Geen dagen gevonden');
 
     programData = {
-      method_name: extract('method_name') || 'Slaapprogramma',
-      method_tagline: extract('method_tagline') || '',
-      method_description: extract('method_description') || '',
-      expectation: extract('expectation') || '',
-      duration_weeks: extractNum('duration_weeks') || 2,
-      difficulty: extract('difficulty') || 'Gemiddeld',
+      method_name: getField(raw, 'method_name') || 'Slaapprogramma',
+      method_tagline: getField(raw, 'method_tagline') || '',
+      method_description: getField(raw, 'method_description') || '',
+      expectation: getField(raw, 'expectation') || '',
+      duration_weeks: getNum(raw, 'duration_weeks') || 2,
+      difficulty: getField(raw, 'difficulty') || 'Gemiddeld',
       program: days
     };
 
     currentDay = 0;
     renderResult();
     showScreen('result');
-  } catch (e) {
+  } catch(e) {
     const msg = e.name === 'AbortError'
       ? (lang === 'nl' ? 'Het duurde te lang. Probeer opnieuw.' : 'Took too long. Try again.')
       : (lang === 'nl' ? 'Er ging iets mis. Probeer opnieuw.' : 'Something went wrong. Try again.');
